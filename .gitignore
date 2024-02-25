@@ -1,0 +1,11 @@
+backup/
+cache/
+lib/
+locales/
+*.dll
+*.pak
+*.dat
+*.bin
+*.json
+*.lib
+*.log
