@@ -6,9 +6,9 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants, uCEFInterfaces,
-  uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages, ExtCtrls,
-  uCEFWinControl;
+  uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants,
+  uCEFInterfaces, uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages,
+  ExtCtrls, DCPripemd160, uCEFWinControl;
 
 
 const
@@ -26,6 +26,7 @@ type
     Button2: TButton;
     CEFWindowParent1: TCEFWindowParent;
     Chromium1: TChromium;
+    DCP_ripemd160_1: TDCP_ripemd160;
     Memo1: TMemo;
     Timer1: TTimer;
     procedure Button1Click(Sender: TObject);
@@ -66,14 +67,76 @@ uses
 
 {$R *.lfm}
 
+type
+  TDigest = array[0..4] of DWord;
+
+const
+  MaxChecksum = 10;
+  MaxLength = 1024;
+
 var
   SockServer: TSimpleWebsocketServer;
 
+  CountPrev : Integer = 0;
+  CheckPrev : array[0..MaxChecksum] of TDigest;
+  DupPrev   : array[0..MaxChecksum] of Integer;
 
-procedure EnumDOM(const ANode: ICefDomNode; var Res:ICefDomNode);
+  debugout : string;
+
+
+procedure MakeCheck(const s:rawbytestring; var aDigest: TDigest);
 var
-  TempChild, ChatNode: ICefDomNode;
+  HashCalc: TDCP_ripemd160;
+begin
+  HashCalc:=TDCP_ripemd160.Create(nil);
+  try
+    HashCalc.Burn;
+    HashCalc.Init;
+    if Length(s)>0 then
+      begin
+        HashCalc.Update(s[1],Length(s));
+        HashCalc.Final(aDigest);
+      end;
+  finally
+    HashCalc.Free;
+  end;
+end;
+
+function CompareCheck(const a, b:TDigest):Boolean;
+begin
+  Result:=CompareMem(@(a[0]),@(b[0]),sizeof(TDigest));
+end;
+
+function CheckString(const a:TDigest):string;
+var
+  i:Integer;
+begin
+  Result:='';
+  for i:=0 to 4 do
+    Result:=Result+IntToHex(a[i]);
+end;
+
+procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode);
+const
+  // live_chatting_donation_message
+  // live_chatting_list_subscription
+  // live_chatting_message_is_hidden
+  nonchatclass = ' live_';
+  hiddenchatclass = '_message_is_hidden';
+  chatclass = 'live_chatting_list_item';
+  chatcontainer = 'live_chatting_list_wrapper';
+var
+  TempChild, ChatNode, ChatBottom, ChatFirst: ICefDomNode;
   nodeattr: ustring;
+
+  CheckItem, CheckItemLast: TDigest;
+  CheckCurr: array[0..MaxChecksum] of TDigest;
+  DupCurr: array[0..MaxChecksum] of Integer;
+  CountCurr: Integer;
+  ItemIdx, PrevIdx: Integer;
+  s : ansistring;
+  DoInc, Matched: Boolean;
+
 begin
   TempChild:=ANode;
   if TempChild<>nil then
@@ -81,26 +144,124 @@ begin
       while TempChild<> nil do
         begin
           // search chat DOM
-          if (TempChild.Name='DIV') and (POS('live_chatting_list_wrapper',TempChild.GetElementAttribute('CLASS'))<>0) then
+          if (TempChild.Name='DIV') and (POS(chatcontainer,TempChild.GetElementAttribute('CLASS'))<>0) then
             begin
               Res:=TempChild;
-              ChatNode:=TempChild.FirstChild;
+              ChatNode:=TempChild.LastChild;
+
+              CountCurr:=0;
+              ItemIdx:=-1;
+              PrevIdx:=0;
+              FillChar(DupCurr,sizeof(DupCurr),0);
+              FillChar(CheckCurr,sizeof(CheckCurr),0);
+              ChatBottom:=nil;
+              ChatFirst:=nil;
+              Matched:=False;
+              MakeCheck('',CheckItemLast);
               // log
               while ChatNode<>nil do
                 begin
                   nodeattr:=ChatNode.GetElementAttribute('CLASS');
                   // chat only
-                  if (POS('live_chatting_list_guide',nodeattr)=0) and
-                     (POS('live_chatting_list_item',nodeattr)<>0) then
+                  if ((POS(nonchatclass,nodeattr)=0) or (POS(hiddenchatclass,nodeattr)<>0)) and
+                     (POS(chatclass,nodeattr)<>0) then
                        begin
-                         SockServer.BroadcastMsg(UTF8Encode(ChatNode.AsMarkup));
-                         CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<2> ' + ChatNode.AsMarkup);
+                         DoInc:=False;
+                         if POS(nonchatclass,nodeattr)<>0 then
+                           begin
+                             // hideden chat
+                           end else
+                           begin
+                             // chat
+                             if ChatBottom=nil then
+                               ChatBottom:=ChatNode;
+
+                             s:=UTF8Encode(ChatNode.AsMarkup);
+                             MakeCheck(copy(s,1,MaxLength),CheckItem);
+                             //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, CheckString(CheckItem));
+                             // generate new checksum
+                             DoInc:=CompareCheck(CheckItem,CheckItemLast);
+                             if DoInc then
+                                 Inc(DupCurr[ItemIdx])
+                                 else
+                                   begin
+                                     if ItemIdx<MaxChecksum then
+                                       begin
+                                         Inc(ItemIdx);
+                                         CheckCurr[ItemIdx]:=CheckItem;
+                                       end
+                                       else
+                                         // matched partial
+                                         if PrevIdx>0 then
+                                           Matched:=True;
+                                   end;
+                             // compare checksum
+                             if (not Matched) then
+                               begin
+                                 if (CountPrev>0) and
+                                    (PrevIdx<CountPrev) and
+                                    CompareCheck(CheckCurr[ItemIdx],CheckPrev[PrevIdx]) then
+                                   begin
+                                     if DupCurr[ItemIdx]>DupPrev[PrevIdx] then
+                                       begin
+                                         PrevIdx:=0;
+                                         ChatFirst:=ChatNode;
+                                       end else
+                                       begin
+                                         if DupCurr[ItemIdx]=DupPrev[PrevIdx] then
+                                           begin
+                                             if PrevIdx<CountPrev then
+                                               Inc(PrevIdx);
+                                             // matched full
+                                             if PrevIdx=CountPrev then
+                                               Matched:=True;
+                                           end;
+                                       end;
+                                   end else
+                                   begin
+                                     PrevIdx:=0;
+                                     ChatFirst:=ChatNode;
+                                   end;
+                               end;
+
+                             CheckItemLast:=CheckItem;
+                           end;
+                           //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<2> ' + ChatNode.AsMarkup);
+                       end else
+                       begin
+                         // system messages
                        end;
-                  ChatNode:=ChatNode.NextSibling;
+                  ChatNode:=ChatNode.PreviousSibling;
                 end;
+                //
+                CheckPrev:=CheckCurr;
+                DupPrev:=DupCurr;
+                CountPrev:=ItemIdx+1;
+                // process new chat
+                ChatNode:=ChatFirst;
+                while ChatNode<>nil do
+                  begin
+                    nodeattr:=ChatNode.GetElementAttribute('CLASS');
+                    if ( (POS(nonchatclass,nodeattr)=0) or
+                         (POS(hiddenchatclass,nodeattr)<>0) ) and
+                       (POS(chatclass,nodeattr)<>0) then
+                    begin
+                      if POS(nonchatclass,nodeattr)<>0 then
+                      begin
+                        //
+                      end else
+                      begin
+                        SockServer.BroadcastMsg(UTF8Encode(ChatNode.AsMarkup));
+                        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<4> ' + ChatNode.AsMarkup);
+                      end;
+                    end;
+                    if ChatNode=ChatBottom then
+                      break;
+                    ChatNode:=ChatNode.NextSibling;
+                  end;
             end;
           if (Res=nil) and TempChild.HasChildren then
-            EnumDOM(TempChild.FirstChild,Res);
+            ExtractChat(TempChild.FirstChild,Res);
           if Res<>nil then
             break;
           TempChild:=TempChild.NextSibling;
@@ -120,7 +281,7 @@ begin
         TempBody := aDocument.Body;
         if TempBody <> nil then
           begin
-            EnumDOM(TempBody.FirstChild,Res);
+            ExtractChat(TempBody.FirstChild,Res);
           end;
       end;
     if Res=nil then
@@ -279,6 +440,7 @@ begin
   GlobalCEFApp.EnablePrintPreview  := True;
   GlobalCEFApp.EnableGPU           := True;
   GlobalCEFApp.SetCurrentDir       := True;
+  //GlobalCEFApp.SingleProcess       := True;
 end;
 
 initialization
