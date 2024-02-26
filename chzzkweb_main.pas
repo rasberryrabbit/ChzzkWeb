@@ -61,9 +61,14 @@ implementation
 
 uses
   uCEFMiscFunctions, uCEFProcessMessage, uCEFDomVisitor,
-  Windows, Clipbrd;
+  Windows, uWebsockSimple;
+
 
 {$R *.lfm}
+
+var
+  SockServer: TSimpleWebsocketServer;
+
 
 procedure EnumDOM(const ANode: ICefDomNode; var Res:ICefDomNode);
 var
@@ -75,6 +80,7 @@ begin
     begin
       while TempChild<> nil do
         begin
+          // search chat DOM
           if (TempChild.Name='DIV') and (POS('live_chatting_list_wrapper',TempChild.GetElementAttribute('CLASS'))<>0) then
             begin
               Res:=TempChild;
@@ -83,9 +89,11 @@ begin
               while ChatNode<>nil do
                 begin
                   nodeattr:=ChatNode.GetElementAttribute('CLASS');
+                  // chat only
                   if (POS('live_chatting_list_guide',nodeattr)=0) and
                      (POS('live_chatting_list_item',nodeattr)<>0) then
                        begin
+                         SockServer.BroadcastMsg(UTF8Encode(ChatNode.AsMarkup));
                          CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<2> ' + ChatNode.AsMarkup);
                        end;
                   ChatNode:=ChatNode.NextSibling;
@@ -215,6 +223,7 @@ begin
   if message=nil then
     exit;
 
+  // receive MSG from RENDERER
   if message.Name=SVERBOSEDOM then
     begin
       Result:=True;
@@ -271,6 +280,13 @@ begin
   GlobalCEFApp.EnableGPU           := True;
   GlobalCEFApp.SetCurrentDir       := True;
 end;
+
+initialization
+  SockServer:=TSimpleWebsocketServer.Create('65020');
+
+finalization
+  SockServer.Free;
+
 
 end.
 
