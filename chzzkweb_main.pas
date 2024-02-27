@@ -137,7 +137,7 @@ var
   CountCurr: Integer;
   ItemIdx, PrevIdx: Integer;
   s : ansistring;
-  DoInc, Matched: Boolean;
+  bMake, bCompare: Boolean;
 
   Msg: ICefProcessMessage;
 
@@ -160,7 +160,8 @@ begin
               FillChar(CheckCurr,sizeof(CheckCurr),0);
               ChatBottom:=nil;
               ChatFirst:=nil;
-              Matched:=False;
+              bCompare:=True;
+              bMake:=True;
               MakeCheck('',CheckItemLast);
               // log
               while ChatNode<>nil do
@@ -169,7 +170,6 @@ begin
                   // chat only
                   if (POS(chatclass,nodeattr)<>0) then
                        begin
-                         DoInc:=False;
                          if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
                            begin
                              // system
@@ -184,46 +184,51 @@ begin
                                  // hidden chat
                                  break;
                                end;
-                             s:=UTF8Encode(ChatNode.AsMarkup);
-                             MakeCheck(copy(s,1,MaxLength),CheckItem);
-                             //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, CheckString(CheckItem));
-                             // generate new checksum
-                             DoInc:=CompareCheck(CheckItem,CheckItemLast);
-                             if DoInc then
-                                 Inc(DupCurr[ItemIdx])
-                                 else
-                                   begin
-                                     if ItemIdx<MaxChecksum then
-                                       begin
-                                         Inc(ItemIdx);
-                                         CheckCurr[ItemIdx]:=CheckItem;
-                                       end
-                                       else
-                                         // matched partial
-                                         if PrevIdx>0 then
-                                           Matched:=True;
-                                   end;
-                             // compare checksum
-                             if (not Matched) then
+                             // generate checksum list
+                             if bMake then
                                begin
-                                 if (CountPrev>0) and
-                                    (PrevIdx<CountPrev) and
-                                    CompareCheck(CheckCurr[ItemIdx],CheckPrev[PrevIdx]) then
+                                 s:=UTF8Encode(ChatNode.AsMarkup);
+                                 MakeCheck(copy(s,1,MaxLength),CheckItem);
+                                 if CompareCheck(CheckItem,CheckItemLast) then
+                                   Inc(DupCurr[ItemIdx])
+                                   else
+                                     begin
+                                       if ItemIdx<MaxChecksum then
+                                         begin
+                                           Inc(ItemIdx);
+                                           CheckCurr[ItemIdx]:=CheckItem;
+                                         end
+                                         else
+                                         begin
+                                           bMake:=False;
+                                           bCompare:=False;
+                                         end;
+                                     end;
+                                  CheckItemLast:=CheckItem;
+                               end;
+                             // compare checksum
+                             if bCompare then
+                               begin
+                                 if CountPrev>0 then
                                    begin
-                                     if DupCurr[ItemIdx]>DupPrev[PrevIdx] then
+                                     if CompareCheck(CheckCurr[ItemIdx],CheckPrev[PrevIdx]) then
+                                       begin
+                                         if DupCurr[ItemIdx]>DupPrev[PrevIdx] then
+                                           begin
+                                             PrevIdx:=0;
+                                             ChatFirst:=ChatNode;
+                                           end else
+                                             if DupCurr[ItemIdx]=DupPrev[PrevIdx] then
+                                               begin
+                                                 if PrevIdx<MaxChecksum then
+                                                   Inc(PrevIdx)
+                                                   else
+                                                     bCompare:=False;
+                                               end;
+                                       end else
                                        begin
                                          PrevIdx:=0;
                                          ChatFirst:=ChatNode;
-                                       end else
-                                       begin
-                                         if DupCurr[ItemIdx]=DupPrev[PrevIdx] then
-                                           begin
-                                             if PrevIdx<CountPrev then
-                                               Inc(PrevIdx);
-                                             // matched full
-                                             if PrevIdx=CountPrev then
-                                               Matched:=True;
-                                           end;
                                        end;
                                    end else
                                    begin
@@ -231,10 +236,7 @@ begin
                                      ChatFirst:=ChatNode;
                                    end;
                                end;
-
-                             CheckItemLast:=CheckItem;
                            end;
-                           //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<2> ' + ChatNode.AsMarkup);
                        end;
                   ChatNode:=ChatNode.PreviousSibling;
                 end;
