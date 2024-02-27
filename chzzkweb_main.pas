@@ -80,7 +80,11 @@ var
   CountPrev : Integer = 0;
   CheckPrev : array[0..MaxChecksum] of TDigest;
   DupPrev   : array[0..MaxChecksum] of Integer;
+  ProcessSysChat : Boolean = True;
 
+  CheckHidden : TDigest;
+
+  CEFDebugLog : Boolean = True;
   debugout : string;
 
 
@@ -163,19 +167,23 @@ begin
                 begin
                   nodeattr:=ChatNode.GetElementAttribute('CLASS');
                   // chat only
-                  if ((POS(nonchatclass,nodeattr)=0) or (POS(hiddenchatclass,nodeattr)<>0)) and
-                     (POS(chatclass,nodeattr)<>0) then
+                  if (POS(chatclass,nodeattr)<>0) then
                        begin
                          DoInc:=False;
-                         if POS(nonchatclass,nodeattr)<>0 then
+                         if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
                            begin
-                             // hideden chat
+                             // system
                            end else
                            begin
                              // chat
                              if ChatBottom=nil then
                                ChatBottom:=ChatNode;
 
+                             if (POS(hiddenchatclass,nodeattr)<>0) then
+                               begin
+                                 // hidden chat
+                                 break;
+                               end;
                              s:=UTF8Encode(ChatNode.AsMarkup);
                              MakeCheck(copy(s,1,MaxLength),CheckItem);
                              //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, CheckString(CheckItem));
@@ -227,9 +235,6 @@ begin
                              CheckItemLast:=CheckItem;
                            end;
                            //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<2> ' + ChatNode.AsMarkup);
-                       end else
-                       begin
-                         // system messages
                        end;
                   ChatNode:=ChatNode.PreviousSibling;
                 end;
@@ -252,7 +257,7 @@ begin
                       end else
                       begin
                         SockServer.BroadcastMsg(UTF8Encode(ChatNode.AsMarkup));
-                        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<4> ' + ChatNode.AsMarkup);
+                        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<4> ' + ChatNode.ElementInnerText);
                       end;
                     end;
                     if ChatNode=ChatBottom then
@@ -436,7 +441,10 @@ begin
   GlobalCEFApp.OnProcessMessageReceived := @GlobalCEFApp_OnProcessMessageReceived;
   GlobalCEFApp.cache               := 'cache';
   GlobalCEFApp.LogFile             := 'debug.log';
-  GlobalCEFApp.LogSeverity         := LOGSEVERITY_INFO;
+  if CEFDebugLog then
+    GlobalCEFApp.LogSeverity         := LOGSEVERITY_INFO
+      else
+        GlobalCEFApp.LogSeverity         := LOGSEVERITY_FATAL;
   GlobalCEFApp.EnablePrintPreview  := True;
   GlobalCEFApp.EnableGPU           := True;
   GlobalCEFApp.SetCurrentDir       := True;
@@ -444,6 +452,7 @@ begin
 end;
 
 initialization
+  MakeCheck('hidden',CheckHidden);
   SockServer:=TSimpleWebsocketServer.Create('65020');
 
 finalization
