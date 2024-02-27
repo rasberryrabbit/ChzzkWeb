@@ -83,8 +83,7 @@ var
 
   CheckHidden : TDigest;
 
-  CEFDebugLog : Boolean = True;
-  debugout : string;
+  CEFDebugLog : Boolean = False;
 
 
 procedure MakeCheck(const s:rawbytestring; var aDigest: TDigest);
