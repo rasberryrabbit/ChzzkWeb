@@ -265,7 +265,8 @@ begin
                         finally
                           Msg:=nil;
                         end;
-                        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<4> ' + ChatNode.ElementInnerText);
+                        if CEFDebugLog then
+                          CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<4> ' + ChatNode.ElementInnerText);
                       end;
                     end;
                     if ChatNode=ChatBottom then
@@ -297,10 +298,13 @@ begin
             ExtractChat(TempBody.FirstChild,Res, aFrame);
           end;
       end;
-    if Res=nil then
-      CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '===== Cannot Find Chat Node =====')
-      else
-        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '===== End of Chat Node =====');
+    if CEFDebugLog then
+      begin
+        if Res=nil then
+          CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '===== Cannot Find Chat Node =====')
+          else
+            CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '===== End of Chat Node =====');
+      end;
   except
     on e : exception do
       if CustomExceptionHandler('SimpleDOMIteration', e) then raise;
@@ -319,7 +323,8 @@ begin
   // As an example, this function only writes the document title to the 'debug.log' file.
   if POS(ChzzkURL,frame.Url)=0 then
     exit;
-  CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, 'document.Title : ' + document.Title);
+  if CEFDebugLog then
+    CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, 'document.Title : ' + document.Title);
 
   // Simple DOM iteration example
   SimpleDOMIteration(document, frame);
@@ -450,10 +455,7 @@ begin
   GlobalCEFApp.OnProcessMessageReceived := @GlobalCEFApp_OnProcessMessageReceived;
   GlobalCEFApp.cache               := 'cache';
   GlobalCEFApp.LogFile             := 'debug.log';
-  if CEFDebugLog then
-    GlobalCEFApp.LogSeverity         := LOGSEVERITY_INFO
-      else
-        GlobalCEFApp.LogSeverity         := LOGSEVERITY_FATAL;
+  GlobalCEFApp.LogSeverity         := LOGSEVERITY_INFO;
   GlobalCEFApp.EnablePrintPreview  := True;
   GlobalCEFApp.EnableGPU           := True;
   GlobalCEFApp.SetCurrentDir       := True;
