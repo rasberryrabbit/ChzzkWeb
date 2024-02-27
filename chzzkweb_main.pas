@@ -12,10 +12,9 @@ uses
 
 
 const
-  MSG_PROCESS = LM_USER+$101;
   MSGVISITDOM = LM_USER+$102;
-  SVISITDOM   = 'VISITDOM';
-  SVERBOSEDOM = 'VERBOSEDOM';
+  SVISITDOM   = 'V_RENDERER';
+  SVERBOSEDOM = 'V_BROWSER';
 
 type
 
@@ -27,8 +26,8 @@ type
     CEFWindowParent1: TCEFWindowParent;
     Chromium1: TChromium;
     DCP_ripemd160_1: TDCP_ripemd160;
-    Memo1: TMemo;
     Timer1: TTimer;
+    Timer2: TTimer;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Chromium1AfterCreated(Sender: TObject; const browser: ICefBrowser
@@ -42,8 +41,8 @@ type
       Result: Boolean);
     procedure FormShow(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure Timer2Timer(Sender: TObject);
   private
-    procedure MSGProcess(var Msg:TLMessage); message MSG_PROCESS;
     procedure VISITDOM(var Msg:TLMessage); message MSGVISITDOM;
 
     // CEF
@@ -120,7 +119,7 @@ begin
     Result:=Result+IntToHex(a[i]);
 end;
 
-procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode);
+procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
 const
   // live_chatting_donation_message
   // live_chatting_list_subscription
@@ -140,6 +139,8 @@ var
   ItemIdx, PrevIdx: Integer;
   s : ansistring;
   DoInc, Matched: Boolean;
+
+  Msg: ICefProcessMessage;
 
 begin
   TempChild:=ANode;
@@ -256,7 +257,15 @@ begin
                         //
                       end else
                       begin
-                        SockServer.BroadcastMsg(UTF8Encode(ChatNode.AsMarkup));
+                        // send new chat item to BROWSER
+                        Msg:=TCefProcessMessageRef.New(SVERBOSEDOM);
+                        try
+                          Msg.ArgumentList.SetString(0,ChatNode.AsMarkup);
+                          if (aFrame<>nil) and aFrame.IsValid then
+                            aFrame.SendProcessMessage(PID_BROWSER,Msg);
+                        finally
+                          Msg:=nil;
+                        end;
                         CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<4> ' + ChatNode.ElementInnerText);
                       end;
                     end;
@@ -266,7 +275,7 @@ begin
                   end;
             end;
           if (Res=nil) and TempChild.HasChildren then
-            ExtractChat(TempChild.FirstChild,Res);
+            ExtractChat(TempChild.FirstChild,Res,aFrame);
           if Res<>nil then
             break;
           TempChild:=TempChild.NextSibling;
@@ -274,7 +283,7 @@ begin
     end;
 end;
 
-procedure SimpleDOMIteration(const aDocument: ICefDomDocument);
+procedure SimpleDOMIteration(const aDocument: ICefDomDocument; const aFrame: ICefFrame);
 var
   TempBody, Res : ICefDomNode;
 begin
@@ -286,7 +295,7 @@ begin
         TempBody := aDocument.Body;
         if TempBody <> nil then
           begin
-            ExtractChat(TempBody.FirstChild,Res);
+            ExtractChat(TempBody.FirstChild,Res, aFrame);
           end;
       end;
     if Res=nil then
@@ -301,27 +310,21 @@ end;
 
 
 procedure DOMVisitor_OnDocAvailable(const browser: ICefBrowser; const frame: ICefFrame; const document: ICefDomDocument);
+const
+  ChzzkURL ='chzzk.naver.com/live/';
 var
   TempMessage : ICefProcessMessage;
 begin
   // This function is called from a different process.
   // document is only valid inside this function.
   // As an example, this function only writes the document title to the 'debug.log' file.
+  if POS(ChzzkURL,frame.Url)=0 then
+    exit;
   CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, 'document.Title : ' + document.Title);
 
   // Simple DOM iteration example
-  SimpleDOMIteration(document);
+  SimpleDOMIteration(document, frame);
 
-  // Sending back some custom results to the browser process
-  try
-    TempMessage := TCefProcessMessageRef.New(SVERBOSEDOM);
-    TempMessage.ArgumentList.SetString(0, 'document.Title : ' + document.Title);
-
-    if (frame <> nil) and frame.IsValid then
-      frame.SendProcessMessage(PID_BROWSER, TempMessage);
-  finally
-    TempMessage := nil;
-  end;
 end;
 
 procedure GlobalCEFApp_OnProcessMessageReceived(const browser       : ICefBrowser;
@@ -358,7 +361,11 @@ end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 begin
-  PostMessage(Handle, MSGVISITDOM, 0, 0);
+  Timer2.Enabled:=not Timer2.Enabled;
+  if Timer2.Enabled then
+    Button2.Caption:='Enabled'
+    else
+      Button2.Caption:='Disabled';
 end;
 
 procedure TForm1.Chromium1AfterCreated(Sender: TObject;
@@ -384,14 +391,17 @@ procedure TForm1.Chromium1ProcessMessageReceived(Sender: TObject;
   const browser: ICefBrowser; const frame: ICefFrame;
   sourceProcess: TCefProcessId; const message: ICefProcessMessage; out
   Result: Boolean);
+var
+  s: ustring;
 begin
   Result := False;
   if message=nil then
     exit;
 
-  // receive MSG from RENDERER
   if message.Name=SVERBOSEDOM then
     begin
+      s:=message.ArgumentList.GetString(0);
+      SockServer.BroadcastMsg(UTF8Encode(s));
       Result:=True;
     end;
 end;
@@ -408,9 +418,9 @@ begin
     Timer1.Enabled := True;
 end;
 
-procedure TForm1.MSGProcess(var Msg: TLMessage);
+procedure TForm1.Timer2Timer(Sender: TObject);
 begin
-  Memo1.Lines.Add(IntToStr(Msg.lParam));
+  PostMessage(Handle, MSGVISITDOM, 0, 0);
 end;
 
 procedure TForm1.VISITDOM(var Msg: TLMessage);
@@ -453,7 +463,7 @@ end;
 
 initialization
   MakeCheck('hidden',CheckHidden);
-  SockServer:=TSimpleWebsocketServer.Create('65020');
+  SockServer:=TSimpleWebsocketServer.Create('65002');
 
 finalization
   SockServer.Free;
