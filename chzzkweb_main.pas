@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
   uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants,
   uCEFInterfaces, uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages,
-  ExtCtrls, uCEFWinControl;
+  ExtCtrls, uCEFWinControl, UniqueInstance;
 
 
 const
@@ -27,6 +27,7 @@ type
     Chromium1: TChromium;
     Timer1: TTimer;
     Timer2: TTimer;
+    UniqueInstance1: TUniqueInstance;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Chromium1AfterCreated(Sender: TObject; const browser: ICefBrowser

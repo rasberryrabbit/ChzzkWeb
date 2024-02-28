@@ -23,6 +23,9 @@
     </RunParams>
     <RequiredPackages>
       <Item>
+        <PackageName Value="uniqueinstance_package"/>
+      </Item>
+      <Item>
         <PackageName Value="mormot2"/>
       </Item>
       <Item>
