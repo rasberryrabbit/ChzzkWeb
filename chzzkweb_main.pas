@@ -249,7 +249,17 @@ begin
                     begin
                       if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
                       begin
-                        //
+                        // send new chat item to BROWSER
+                        Msg:=TCefProcessMessageRef.New(SVERBOSEDOM);
+                        try
+                          Msg.ArgumentList.SetString(0,ChatNode.AsMarkup);
+                          if (aFrame<>nil) and aFrame.IsValid then
+                            aFrame.SendProcessMessage(PID_BROWSER,Msg);
+                        finally
+                          Msg:=nil;
+                        end;
+                        if CEFDebugLog then
+                          CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<5> ' + ChatNode.ElementInnerText);
                       end else
                       begin
                         // send new chat item to BROWSER
