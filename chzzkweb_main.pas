@@ -244,11 +244,9 @@ begin
                 while ChatNode<>nil do
                   begin
                     nodeattr:=ChatNode.GetElementAttribute('CLASS');
-                    if ( (POS(nonchatclass,nodeattr)=0) or
-                         (POS(hiddenchatclass,nodeattr)<>0) ) and
-                       (POS(chatclass,nodeattr)<>0) then
+                    if (POS(chatclass,nodeattr)<>0) then
                     begin
-                      if POS(nonchatclass,nodeattr)<>0 then
+                      if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
                       begin
                         //
                       end else
