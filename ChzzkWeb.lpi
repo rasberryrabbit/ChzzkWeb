@@ -23,6 +23,9 @@
     </RunParams>
     <RequiredPackages>
       <Item>
+        <PackageName Value="mormot2"/>
+      </Item>
+      <Item>
         <PackageName Value="dcpcrypt_laz"/>
       </Item>
       <Item>
@@ -47,6 +50,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ChzzkWeb_Main"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uchecksumlist.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uChecksumList"/>
       </Unit>
     </Units>
   </ProjectOptions>

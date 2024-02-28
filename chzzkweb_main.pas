@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
   uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants,
   uCEFInterfaces, uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages,
-  ExtCtrls, DCPripemd160, uCEFWinControl;
+  ExtCtrls, uCEFWinControl;
 
 
 const
@@ -25,7 +25,6 @@ type
     Button2: TButton;
     CEFWindowParent1: TCEFWindowParent;
     Chromium1: TChromium;
-    DCP_ripemd160_1: TDCP_ripemd160;
     Timer1: TTimer;
     Timer2: TTimer;
     procedure Button1Click(Sender: TObject);
@@ -61,62 +60,20 @@ implementation
 
 uses
   uCEFMiscFunctions, uCEFProcessMessage, uCEFDomVisitor,
-  Windows, uWebsockSimple;
+  Windows, uWebsockSimple, uChecksumList;
 
 
 {$R *.lfm}
 
-type
-  TDigest = array[0..4] of DWord;
-
 const
-  MaxChecksum = 10;
   MaxLength = 1024;
 
 var
   SockServer: TSimpleWebsocketServer;
-
-  CountPrev : Integer = 0;
-  CheckPrev : array[0..MaxChecksum] of TDigest;
-  DupPrev   : array[0..MaxChecksum] of Integer;
   ProcessSysChat : Boolean = True;
-
   CheckHidden : TDigest;
-
   CEFDebugLog : Boolean = False;
 
-
-procedure MakeCheck(const s:rawbytestring; var aDigest: TDigest);
-var
-  HashCalc: TDCP_ripemd160;
-begin
-  HashCalc:=TDCP_ripemd160.Create(nil);
-  try
-    HashCalc.Burn;
-    HashCalc.Init;
-    if Length(s)>0 then
-      begin
-        HashCalc.Update(s[1],Length(s));
-        HashCalc.Final(aDigest);
-      end;
-  finally
-    HashCalc.Free;
-  end;
-end;
-
-function CompareCheck(const a, b:TDigest):Boolean;
-begin
-  Result:=CompareMem(@(a[0]),@(b[0]),sizeof(TDigest));
-end;
-
-function CheckString(const a:TDigest):string;
-var
-  i:Integer;
-begin
-  Result:='';
-  for i:=0 to 4 do
-    Result:=Result+IntToHex(a[i]);
-end;
 
 procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
 const
@@ -128,16 +85,14 @@ const
   chatclass = 'live_chatting_list_item';
   chatcontainer = 'live_chatting_list_wrapper';
 var
-  TempChild, ChatNode, ChatBottom, ChatFirst: ICefDomNode;
+  TempChild, ChatNode, ChatBottom, ChatFirst, ChatComp: ICefDomNode;
   nodeattr: ustring;
 
-  CheckItem, CheckItemLast: TDigest;
-  CheckCurr: array[0..MaxChecksum] of TDigest;
-  DupCurr: array[0..MaxChecksum] of Integer;
-  CountCurr: Integer;
-  ItemIdx, PrevIdx: Integer;
+  CheckItem, CheckItemLast, CheckItemComp: TDigest;
+  pBuild, pPrev: pChecksumData;
+  DupCount, DupCountComp: Integer;
   s : ansistring;
-  bMake, bCompare: Boolean;
+  bMake, bCompare, bDup: Boolean;
 
   Msg: ICefProcessMessage;
 
@@ -153,16 +108,14 @@ begin
               Res:=TempChild;
               ChatNode:=TempChild.LastChild;
 
-              CountCurr:=0;
-              ItemIdx:=-1;
-              PrevIdx:=0;
-              FillChar(DupCurr,sizeof(DupCurr),0);
-              FillChar(CheckCurr,sizeof(CheckCurr),0);
+              CheckBuild.Clear;
               ChatBottom:=nil;
               ChatFirst:=nil;
               bCompare:=True;
               bMake:=True;
+              bDup:=False;
               MakeCheck('',CheckItemLast);
+              DupCount:=0;
               // log
               while ChatNode<>nil do
                 begin
@@ -184,56 +137,100 @@ begin
                                  // hidden chat
                                  break;
                                end;
-                             // generate checksum list
+                             // build checksum list
                              if bMake then
                                begin
+                                 // make checksum
                                  s:=UTF8Encode(ChatNode.AsMarkup);
                                  MakeCheck(copy(s,1,MaxLength),CheckItem);
-                                 if CompareCheck(CheckItem,CheckItemLast) then
-                                   Inc(DupCurr[ItemIdx])
+                                 bDup:=CompareCheck(CheckItem,CheckItemLast);
+                                 if bDup then
+                                   Inc(DupCount)
                                    else
+                                     DupCount:=0;
+                                 CheckItemLast:=CheckItem;
+                                 if bDup then
+                                   begin
+                                     pBuild^.dup:=DupCount;
+                                   end else
                                      begin
-                                       if ItemIdx<MaxChecksum then
+                                       if CheckBuild.DataIndex<MaxChecksumList-1 then
                                          begin
-                                           Inc(ItemIdx);
-                                           CheckCurr[ItemIdx]:=CheckItem;
+                                           pBuild:=CheckBuild.AddCheck;
+                                           pBuild^.Checksum:=CheckItem;
                                          end
-                                         else
-                                         begin
-                                           bMake:=False;
-                                           bCompare:=False;
-                                         end;
+                                       else
+                                         bMake:=False;
                                      end;
-                                  CheckItemLast:=CheckItem;
                                end;
                              // compare checksum
                              if bCompare then
                                begin
-                                 if CountPrev>0 then
+                                 ChatComp:=ChatNode;
+                                 DupCountComp:=0;
+                                 pPrev:=CheckPrev.FirstCheck;
+                                 MakeCheck('',CheckItemComp);
+                                 while ChatComp<>nil do
                                    begin
-                                     if CompareCheck(CheckCurr[ItemIdx],CheckPrev[PrevIdx]) then
+                                     // compare chat only
+                                     nodeattr:=ChatComp.GetElementAttribute('CLASS');
+                                     if (POS(chatclass,nodeattr)<>0) then
                                        begin
-                                         if DupCurr[ItemIdx]>DupPrev[PrevIdx] then
+                                         if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
                                            begin
-                                             PrevIdx:=0;
-                                             ChatFirst:=ChatNode;
-                                           end else
-                                             if DupCurr[ItemIdx]=DupPrev[PrevIdx] then
+                                             // system
+                                           end
+                                           else
+                                           begin
+                                             if (POS(hiddenchatclass,nodeattr)<>0) then
                                                begin
-                                                 if PrevIdx<MaxChecksum then
-                                                   Inc(PrevIdx)
-                                                   else
-                                                     bCompare:=False;
+                                                 // hidden chat
+                                                 break;
                                                end;
-                                       end else
-                                       begin
-                                         PrevIdx:=0;
-                                         ChatFirst:=ChatNode;
+                                             // make checksum
+                                             s:=UTF8Encode(ChatComp.AsMarkup);
+                                             MakeCheck(copy(s,1,MaxLength),CheckItem);
+                                             bDup:=CompareCheck(CheckItem,CheckItemComp);
+                                             if bDup then
+                                               Inc(DupCountComp)
+                                               else
+                                                 DupCountComp:=0;
+                                             CheckItemComp:=CheckItem;
+
+                                             // compare
+                                             if CheckPrev.Count>0 then
+                                               begin
+                                                 if CompareCheck(CheckItem,pPrev^.Checksum) then
+                                                   begin
+                                                     if DupCountComp=pPrev^.dup then
+                                                       begin
+                                                         pPrev:=CheckPrev.NextCheck;
+                                                         if pPrev=nil then
+                                                           begin
+                                                             bCompare:=False;
+                                                             break;
+                                                           end;
+                                                       end else
+                                                       if DupCountComp>pPrev^.dup then
+                                                         begin
+                                                           ChatFirst:=ChatNode;
+                                                           break;
+                                                         end;
+                                                   end
+                                                   else
+                                                   begin
+                                                     ChatFirst:=ChatNode;
+                                                     break;
+                                                   end;
+                                               end
+                                               else
+                                               begin
+                                                 ChatFirst:=ChatNode;
+                                                 break;
+                                               end;
+                                           end;
                                        end;
-                                   end else
-                                   begin
-                                     PrevIdx:=0;
-                                     ChatFirst:=ChatNode;
+                                     ChatComp:=ChatComp.PreviousSibling;
                                    end;
                                end;
                            end;
@@ -241,9 +238,7 @@ begin
                   ChatNode:=ChatNode.PreviousSibling;
                 end;
                 //
-                CheckPrev:=CheckCurr;
-                DupPrev:=DupCurr;
-                CountPrev:=ItemIdx+1;
+                CheckPrev.CopyData(CheckBuild);
                 // process new chat
                 ChatNode:=ChatFirst;
                 while ChatNode<>nil do
@@ -317,8 +312,6 @@ end;
 procedure DOMVisitor_OnDocAvailable(const browser: ICefBrowser; const frame: ICefFrame; const document: ICefDomDocument);
 const
   ChzzkURL ='chzzk.naver.com/live/';
-var
-  TempMessage : ICefProcessMessage;
 begin
   // This function is called from a different process.
   // document is only valid inside this function.

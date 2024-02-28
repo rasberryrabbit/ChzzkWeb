@@ -12,7 +12,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, Windows,
   uCEFApplication,
-  ChzzkWeb_Main
+  ChzzkWeb_Main, uChecksumList
   { you can add units after this };
 
 {$R *.res}
