@@ -6,25 +6,30 @@
 <link rel="stylesheet" href="./jquery/jquery-ui.css" />
 <link type="text/css" rel="stylesheet" href="main.17867962.css" />
 <script src = "./jquery/jquery-3.7.1.min.js"></script>
-<script src = "./jquery/jquery-ui.min.js"></script>
+<script src = "./jquery/jquery-ui.js"></script>
 <script>
-var chatsize = JSON.parse(sessionStorage.chatsize || "{}");
+try {
+var chatsize = JSON.parse(localStorage.chatsize || "{}");
+} catch(e) {
+var chatsize = JSON.parse("{}");
+}
+var windowname='chatwindowchzzk';    // 단일 이름을 지정.
 $(document).ready(function(){
   // load/save size
-  if(chatsize.wrapper) {
-    $("#wrapper").width(chatsize.wrapper.width);
-    $("#wrapper").height(chatsize.wrapper.height);
+  if(chatsize[windowname]) {
+    $("#wrapper").width(chatsize[windowname].width);
+    $("#wrapper").height(chatsize[windowname].height);
   }
   // make resizable
   $("#wrapper").resizable({autoHide: true, stop: function (event, ui) {
-            chatsize[this.id] = ui.size
-            sessionStorage.chatsize = JSON.stringify(chatsize);
+            chatsize[windowname] = ui.size;
+            localStorage.chatsize = JSON.stringify(chatsize);
         }}); 
 });
 </script>
 </head> 
 <body>
-<div id="wrapper">   
+<div id="wrapper" >   
     <div id="chatbox"></div>
 </div>
 <script type="text/javascript" src="reconnecting-websocket.min.js"></script>
