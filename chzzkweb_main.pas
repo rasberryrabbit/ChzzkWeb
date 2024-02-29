@@ -96,6 +96,7 @@ const
   hiddenchatclass = '_message_is_hidden';
   chatclass = 'live_chatting_list_item';
   chatcontainer = 'live_chatting_list_wrapper';
+  chatguide = '_list_guide';
 var
   TempChild, ChatNode, ChatBottom, ChatFirst, ChatComp: ICefDomNode;
   nodeattr: ustring;
@@ -135,10 +136,10 @@ begin
                   // chat only
                   if (POS(chatclass,nodeattr)<>0) then
                        begin
-                         if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
+                         {if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
                            begin
                              // system
-                           end else
+                           end else}
                            begin
                              // chat
                              if ChatBottom=nil then
@@ -188,11 +189,11 @@ begin
                                      nodeattr:=ChatComp.GetElementAttribute('CLASS');
                                      if (POS(chatclass,nodeattr)<>0) then
                                        begin
-                                         if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
+                                         {if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
                                            begin
                                              // system
                                            end
-                                           else
+                                           else}
                                            begin
                                              if (POS(hiddenchatclass,nodeattr)<>0) then
                                                begin
@@ -258,7 +259,7 @@ begin
                     nodeattr:=ChatNode.GetElementAttribute('CLASS');
                     if (POS(chatclass,nodeattr)<>0) then
                     begin
-                      if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
+                      {if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
                       begin
                         // send new chat item to BROWSER
                         Msg:=TCefProcessMessageRef.New(SVERBOSEDOM);
@@ -271,7 +272,8 @@ begin
                         end;
                         if CEFDebugLog then
                           CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<5> ' + ChatNode.ElementInnerText);
-                      end else
+                      end else}
+                      if (Pos(hiddenchatclass,nodeattr)=0) and (Pos(chatguide,nodeattr)=0) then
                       begin
                         // send new chat item to BROWSER
                         Msg:=TCefProcessMessageRef.New(SVERBOSEDOM);
