@@ -14,7 +14,8 @@ uses
 const
   MSGVISITDOM = LM_USER+$102;
   SVISITDOM   = 'V_RENDERER';
-  SVERBOSEDOM = 'V_BROWSER';
+  SLOGCHAT = 'V_LOGCHAT';
+  SLOGSYS = 'V_LOGSYS';
 
 type
 
@@ -80,8 +81,10 @@ const
   MaxLength = 1024;
 
 var
-  WSPort: string = '65002';
-  SockServer: TSimpleWebsocketServer;
+  WSPortChat: string = '65002';
+  WSPortSys: string = '65003';
+  SockServerChat: TSimpleWebsocketServer;
+  SockServerSys: TSimpleWebsocketServer;
   ProcessSysChat: Boolean = True;
   CheckHidden: TDigest;
   CEFDebugLog: Boolean = False;
@@ -89,14 +92,13 @@ var
 
 procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
 const
-  // live_chatting_donation_message
-  // live_chatting_list_subscription
-  // live_chatting_message_is_hidden
   nonchatclass = ' live_';
   hiddenchatclass = '_message_is_hidden';
   chatclass = 'live_chatting_list_item';
   chatcontainer = 'live_chatting_list_wrapper';
-  chatguide = '_list_guide';
+  chatguide = '_list_guide_';
+  chatdonation = '_list_donation_';
+  chatsubscription = '_list_subscription_';
 var
   TempChild, ChatNode, ChatBottom, ChatFirst, ChatComp: ICefDomNode;
   nodeattr: ustring;
@@ -259,24 +261,25 @@ begin
                     nodeattr:=ChatNode.GetElementAttribute('CLASS');
                     if (POS(chatclass,nodeattr)<>0) then
                     begin
-                      {if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
-                      begin
-                        // send new chat item to BROWSER
-                        Msg:=TCefProcessMessageRef.New(SVERBOSEDOM);
-                        try
-                          Msg.ArgumentList.SetString(0,ChatNode.AsMarkup);
-                          if (aFrame<>nil) and aFrame.IsValid then
-                            aFrame.SendProcessMessage(PID_BROWSER,Msg);
-                        finally
-                          Msg:=nil;
-                        end;
-                        if CEFDebugLog then
-                          CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<5> ' + ChatNode.ElementInnerText);
-                      end else}
+                      if (Pos(chatdonation,nodeattr)<>0) or
+                         (Pos(chatsubscription,nodeattr)<>0) then
+                        begin
+                          // subscription, donation
+                          Msg:=TCefProcessMessageRef.New(SLOGSYS);
+                          try
+                            Msg.ArgumentList.SetString(0,ChatNode.AsMarkup);
+                            if (aFrame<>nil) and aFrame.IsValid then
+                              aFrame.SendProcessMessage(PID_BROWSER,Msg);
+                          finally
+                            Msg:=nil;
+                          end;
+                          if CEFDebugLog then
+                            CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<5> ' + ChatNode.ElementInnerText);
+                        end else
                       if (Pos(hiddenchatclass,nodeattr)=0) and (Pos(chatguide,nodeattr)=0) then
                       begin
-                        // send new chat item to BROWSER
-                        Msg:=TCefProcessMessageRef.New(SVERBOSEDOM);
+                        // chatting
+                        Msg:=TCefProcessMessageRef.New(SLOGCHAT);
                         try
                           Msg.ArgumentList.SetString(0,ChatNode.AsMarkup);
                           if (aFrame<>nil) and aFrame.IsValid then
@@ -382,22 +385,28 @@ end;
 
 procedure TFormChzzkWeb.ActionWSPortExecute(Sender: TObject);
 var
-  ir:Integer;
-  port:string;
+  ir, i: Integer;
+  port: string;
 begin
   ir:=InputCombo('웹소켓 포트','웹소켓 포트를 지정',['65002','65010','65020','65030','65040']);
   case ir of
-  1: WSPort:='65002';
-  2: WSPort:='65010';
-  3: WSPort:='65020';
-  4: WSPort:='65030';
-  5: WSPort:='65040';
+  1: WSPortChat:='65002';
+  2: WSPortChat:='65010';
+  3: WSPortChat:='65020';
+  4: WSPortChat:='65030';
+  5: WSPortChat:='65040';
   end;
   if ir<>-1 then
     begin
-      SockServer.Free;
-      SockServer:=TSimpleWebsocketServer.Create(WSPort);
-      XMLConfig1.SetValue('WS/PORT',WSPort);
+      SockServerChat.Free;
+      SockServerChat:=TSimpleWebsocketServer.Create(WSPortChat);
+      SockServerSys.Free;
+      i:=StrToIntDef(WSPortChat,65002);
+      Inc(i);
+      WSPortSys:=IntToStr(i);
+      SockServerSys:=TSimpleWebsocketServer.Create(WSPortSys);
+      XMLConfig1.SetValue('WS/PORT',WSPortChat);
+      XMLConfig1.SetValue('WS/PORTSYS',WSPortSys);
     end;
 end;
 
@@ -440,12 +449,18 @@ begin
   if message=nil then
     exit;
 
-  if message.Name=SVERBOSEDOM then
+  if message.Name=SLOGCHAT then
     begin
       s:=message.ArgumentList.GetString(0);
-      SockServer.BroadcastMsg(UTF8Encode(s));
+      SockServerChat.BroadcastMsg(UTF8Encode(s));
       Result:=True;
-    end;
+    end else
+    if message.Name=SLOGSYS then
+      begin
+        s:=message.ArgumentList.GetString(0);
+        SockServerSys.BroadcastMsg(UTF8Encode(s));
+        Result:=True;
+      end;
 end;
 
 procedure TFormChzzkWeb.FormClose(Sender: TObject; var CloseAction: TCloseAction
@@ -456,7 +471,8 @@ end;
 
 procedure TFormChzzkWeb.FormDestroy(Sender: TObject);
 begin
-  SockServer.Free;
+  SockServerChat.Free;
+  SockServerSys.Free;
   if XMLConfig1.Modified then
     XMLConfig1.SaveToFile('config.xml');
 end;
@@ -466,8 +482,11 @@ begin
   MakeCheck('hidden',CheckHidden);
   if FileExists('config.xml') then
     XMLConfig1.LoadFromFile('config.xml');
-  WSPort:=XMLConfig1.GetValue('WS/PORT','65002');
-  SockServer:=TSimpleWebsocketServer.Create(WSPort);
+  WSPortChat:=XMLConfig1.GetValue('WS/PORT','65002');
+  WSPortSys:=XMLConfig1.GetValue('WS/PORTSYS','65003');
+
+  SockServerChat:=TSimpleWebsocketServer.Create(WSPortChat);
+  SockServerSys:=TSimpleWebsocketServer.Create(WSPortSys);
 
   if not(Chromium1.CreateBrowser(CEFWindowParent1, '')) then Timer1.Enabled := True;
 end;
