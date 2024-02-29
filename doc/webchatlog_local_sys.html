@@ -42,20 +42,14 @@ chatsock.reconnectInterval=2000;
 chatsock.onmessage = function (event) {
     var div = $("#chatbox");
     chatline=$(event.data);
-    // disable random color
-    //if(!randomcolor) {
-    //  chatline.find('.chat-author__display-name').attr('style','');
-    //}
     div.append(chatline);
-    if (div.children('div').length>500) {
+    if (div.children('div').length>1000) {
       div.children('div')[0].remove();
     }
-    $('#chatbox').animate({scrollTop: document.body.scrollHeight},"slow");
-    // disappear 
-    //var le=document.querySelector('#chatbox').lastChild;
-    //setTimeout(function () {
-    //      le.style.display='none';    
-    //}, 30000);
+    if (document.getElementById("chatbox").offsetHeight>document.documentElement.clientHeight) {
+      nstop=document.getElementById("chatbox").offsetHeight-document.documentElement.clientHeight;
+      $(document.documentElement).animate({scrollTop: nstop},"slow");
+    }
 }
 </script>
 </body>
