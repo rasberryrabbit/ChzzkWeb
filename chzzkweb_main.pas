@@ -78,14 +78,14 @@ uses
 {$R *.lfm}
 
 const
-  MaxLength = 1024;
+  MaxLength = 2048;
 
 var
   WSPortChat: string = '65002';
   WSPortSys: string = '65003';
   SockServerChat: TSimpleWebsocketServer;
   SockServerSys: TSimpleWebsocketServer;
-  ProcessSysChat: Boolean = True;
+  ProcessSysChat: Boolean = False;
   CheckHidden: TDigest;
   CEFDebugLog: Boolean = False;
 
@@ -138,115 +138,102 @@ begin
                   // chat only
                   if (POS(chatclass,nodeattr)<>0) then
                        begin
-                         {if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
-                           begin
-                             // system
-                           end else}
-                           begin
-                             // chat
-                             if ChatBottom=nil then
-                               ChatBottom:=ChatNode;
+                         // chat
+                         if ChatBottom=nil then
+                           ChatBottom:=ChatNode;
 
-                             if (POS(hiddenchatclass,nodeattr)<>0) then
+                         if (POS(hiddenchatclass,nodeattr)<>0) then
+                           begin
+                             // stop at hidden chat
+                             bMake:=False;
+                           end;
+                         // build checksum list
+                         if bMake then
+                           begin
+                             // make checksum
+                             s:=UTF8Encode(ChatNode.AsMarkup);
+                             MakeCheck(copy(s,1,MaxLength),CheckItem);
+                             bDup:=CompareCheck(CheckItem,CheckItemLast);
+                             if bDup then
+                               Inc(DupCount)
+                               else
+                                 DupCount:=0;
+                             CheckItemLast:=CheckItem;
+                             if bDup then
                                begin
-                                 // hidden chat
-                                 break;
-                               end;
-                             // build checksum list
-                             if bMake then
-                               begin
-                                 // make checksum
-                                 s:=UTF8Encode(ChatNode.AsMarkup);
-                                 MakeCheck(copy(s,1,MaxLength),CheckItem);
-                                 bDup:=CompareCheck(CheckItem,CheckItemLast);
-                                 if bDup then
-                                   Inc(DupCount)
-                                   else
-                                     DupCount:=0;
-                                 CheckItemLast:=CheckItem;
-                                 if bDup then
-                                   begin
-                                     pBuild^.dup:=DupCount;
-                                   end else
+                                 pBuild^.dup:=DupCount;
+                               end else
+                                 begin
+                                   if CheckBuild.DataIndex<MaxChecksumList-1 then
                                      begin
-                                       if CheckBuild.DataIndex<MaxChecksumList-1 then
-                                         begin
-                                           pBuild:=CheckBuild.AddCheck;
-                                           pBuild^.Checksum:=CheckItem;
-                                         end
-                                       else
-                                         bMake:=False;
-                                     end;
-                               end;
-                             // compare checksum
-                             if bCompare then
+                                       pBuild:=CheckBuild.AddCheck;
+                                       pBuild^.Checksum:=CheckItem;
+                                     end
+                                   else
+                                     bMake:=False;
+                                 end;
+                           end;
+                         // compare checksum
+                         if bCompare then
+                           begin
+                             ChatComp:=ChatNode;
+                             DupCountComp:=0;
+                             pPrev:=CheckPrev.FirstCheck;
+                             MakeCheck('',CheckItemComp);
+                             while ChatComp<>nil do
                                begin
-                                 ChatComp:=ChatNode;
-                                 DupCountComp:=0;
-                                 pPrev:=CheckPrev.FirstCheck;
-                                 MakeCheck('',CheckItemComp);
-                                 while ChatComp<>nil do
+                                 // compare chat only
+                                 nodeattr:=ChatComp.GetElementAttribute('CLASS');
+                                 if (POS(chatclass,nodeattr)<>0) then
                                    begin
-                                     // compare chat only
-                                     nodeattr:=ChatComp.GetElementAttribute('CLASS');
-                                     if (POS(chatclass,nodeattr)<>0) then
+                                     if (POS(hiddenchatclass,nodeattr)<>0) then
                                        begin
-                                         {if ProcessSysChat and (POS(nonchatclass,nodeattr)<>0) then
-                                           begin
-                                             // system
-                                           end
-                                           else}
-                                           begin
-                                             if (POS(hiddenchatclass,nodeattr)<>0) then
-                                               begin
-                                                 // hidden chat
-                                                 break;
-                                               end;
-                                             // make checksum
-                                             s:=UTF8Encode(ChatComp.AsMarkup);
-                                             MakeCheck(copy(s,1,MaxLength),CheckItem);
-                                             bDup:=CompareCheck(CheckItem,CheckItemComp);
-                                             if bDup then
-                                               Inc(DupCountComp)
-                                               else
-                                                 DupCountComp:=0;
-                                             CheckItemComp:=CheckItem;
+                                         // hidden chat
+                                         break;
+                                       end;
+                                     // make checksum
+                                     s:=UTF8Encode(ChatComp.AsMarkup);
+                                     MakeCheck(copy(s,1,MaxLength),CheckItem);
+                                     bDup:=CompareCheck(CheckItem,CheckItemComp);
+                                     if bDup then
+                                       Inc(DupCountComp)
+                                       else
+                                         DupCountComp:=0;
+                                     CheckItemComp:=CheckItem;
 
-                                             // compare
-                                             if CheckPrev.Count>0 then
+                                     // compare
+                                     if CheckPrev.Count>0 then
+                                       begin
+                                         if CompareCheck(CheckItem,pPrev^.Checksum) then
+                                           begin
+                                             if DupCountComp=pPrev^.dup then
                                                begin
-                                                 if CompareCheck(CheckItem,pPrev^.Checksum) then
+                                                 pPrev:=CheckPrev.NextCheck;
+                                                 if pPrev=nil then
                                                    begin
-                                                     if DupCountComp=pPrev^.dup then
-                                                       begin
-                                                         pPrev:=CheckPrev.NextCheck;
-                                                         if pPrev=nil then
-                                                           begin
-                                                             bCompare:=False;
-                                                             break;
-                                                           end;
-                                                       end else
-                                                       if DupCountComp>pPrev^.dup then
-                                                         begin
-                                                           ChatFirst:=ChatNode;
-                                                           break;
-                                                         end;
-                                                   end
-                                                   else
-                                                   begin
-                                                     ChatFirst:=ChatNode;
+                                                     bCompare:=False;
                                                      break;
                                                    end;
-                                               end
-                                               else
-                                               begin
-                                                 ChatFirst:=ChatNode;
-                                                 break;
-                                               end;
+                                               end else
+                                               if DupCountComp>pPrev^.dup then
+                                                 begin
+                                                   ChatFirst:=ChatNode;
+                                                   break;
+                                                 end;
+                                           end
+                                           else
+                                           begin
+                                             ChatFirst:=ChatNode;
+                                             break;
                                            end;
+                                       end
+                                       else
+                                       begin
+                                         ChatFirst:=ChatNode;
+                                         break;
                                        end;
-                                     ChatComp:=ChatComp.PreviousSibling;
                                    end;
+                                 ChatComp:=ChatComp.PreviousSibling;
                                end;
                            end;
                        end;
@@ -276,20 +263,20 @@ begin
                           if CEFDebugLog then
                             CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<5> ' + ChatNode.ElementInnerText);
                         end else
-                      if (Pos(hiddenchatclass,nodeattr)=0) and (Pos(chatguide,nodeattr)=0) then
-                      begin
-                        // chatting
-                        Msg:=TCefProcessMessageRef.New(SLOGCHAT);
-                        try
-                          Msg.ArgumentList.SetString(0,ChatNode.AsMarkup);
-                          if (aFrame<>nil) and aFrame.IsValid then
-                            aFrame.SendProcessMessage(PID_BROWSER,Msg);
-                        finally
-                          Msg:=nil;
+                        if (Pos(hiddenchatclass,nodeattr)=0) and (Pos(chatguide,nodeattr)=0) then
+                        begin
+                          // chatting
+                          Msg:=TCefProcessMessageRef.New(SLOGCHAT);
+                          try
+                            Msg.ArgumentList.SetString(0,ChatNode.AsMarkup);
+                            if (aFrame<>nil) and aFrame.IsValid then
+                              aFrame.SendProcessMessage(PID_BROWSER,Msg);
+                          finally
+                            Msg:=nil;
+                          end;
+                          if CEFDebugLog then
+                            CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<4> ' + ChatNode.ElementInnerText);
                         end;
-                        if CEFDebugLog then
-                          CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<4> ' + ChatNode.ElementInnerText);
-                      end;
                     end;
                     if ChatNode=ChatBottom then
                       break;
