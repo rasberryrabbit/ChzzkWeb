@@ -26,7 +26,7 @@ begin
   Application.Scaled:=True;
   if GlobalCEFApp.StartMainProcess then begin
     Application.Initialize;
-    Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TFormChzzkWeb, FormChzzkWeb);
     Application.Run;
   end;
 

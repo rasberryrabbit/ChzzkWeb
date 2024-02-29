@@ -1,36 +1,39 @@
-object Form1: TForm1
-  Left = 437
-  Height = 569
-  Top = 175
+object FormChzzkWeb: TFormChzzkWeb
+  Left = 441
+  Height = 549
+  Top = 226
   Width = 933
   Caption = 'ChzzkWeb'
-  ClientHeight = 569
+  ClientHeight = 549
   ClientWidth = 933
+  Menu = MainMenu1
   LCLVersion = '3.99.0.0'
+  OnClose = FormClose
+  OnDestroy = FormDestroy
   OnShow = FormShow
   object CEFWindowParent1: TCEFWindowParent
     Left = 8
-    Height = 489
+    Height = 469
     Top = 72
     Width = 916
     Anchors = [akTop, akLeft, akRight, akBottom]
     TabOrder = 0
   end
   object Button1: TButton
-    Left = 288
+    Left = 16
     Height = 25
     Top = 8
     Width = 75
-    Caption = 'Home'
+    Caption = '치지직 홈'
     TabOrder = 1
     OnClick = Button1Click
   end
   object Button2: TButton
-    Left = 448
+    Left = 128
     Height = 25
     Top = 8
     Width = 75
-    Caption = 'Enabled'
+    Caption = '사용 중'
     TabOrder = 2
     OnClick = Button2Click
   end
@@ -58,5 +61,31 @@ object Form1: TForm1
     Enabled = True
     Left = 24
     Top = 8
+  end
+  object ActionList1: TActionList
+    Left = 104
+    Top = 80
+    object ActionWSPort: TAction
+      Category = 'WebSocket'
+      Caption = '웹소켓 포트 설정'
+      OnExecute = ActionWSPortExecute
+    end
+  end
+  object MainMenu1: TMainMenu
+    Left = 200
+    Top = 83
+    object MenuItem1: TMenuItem
+      Caption = '웹소켓'
+      object MenuItem2: TMenuItem
+        Action = ActionWSPort
+      end
+    end
+  end
+  object XMLConfig1: TXMLConfig
+    StartEmpty = False
+    RootName = 'CONFIG'
+    ReadOnly = False
+    Left = 202
+    Top = 144
   end
 end

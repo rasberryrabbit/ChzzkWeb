@@ -5,10 +5,10 @@ unit ChzzkWeb_Main;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  Classes, SysUtils, XMLConf, Forms, Controls, Graphics, Dialogs, StdCtrls,
   uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants,
   uCEFInterfaces, uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages,
-  ExtCtrls, uCEFWinControl, UniqueInstance;
+  ExtCtrls, ActnList, Menus, uCEFWinControl, UniqueInstance;
 
 
 const
@@ -18,18 +18,26 @@ const
 
 type
 
-  { TForm1 }
+  { TFormChzzkWeb }
 
-  TForm1 = class(TForm)
+  TFormChzzkWeb = class(TForm)
+    ActionWSPort: TAction;
+    ActionList1: TActionList;
     Button1: TButton;
     Button2: TButton;
     CEFWindowParent1: TCEFWindowParent;
     Chromium1: TChromium;
+    MainMenu1: TMainMenu;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
     Timer1: TTimer;
     Timer2: TTimer;
     UniqueInstance1: TUniqueInstance;
+    XMLConfig1: TXMLConfig;
+    procedure ActionWSPortExecute(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    // CEF
     procedure Chromium1AfterCreated(Sender: TObject; const browser: ICefBrowser
       );
     procedure Chromium1BeforeClose(Sender: TObject; const browser: ICefBrowser);
@@ -39,6 +47,8 @@ type
       const browser: ICefBrowser; const frame: ICefFrame;
       sourceProcess: TCefProcessId; const message: ICefProcessMessage; out
       Result: Boolean);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
@@ -53,7 +63,7 @@ type
   end;
 
 var
-  Form1: TForm1;
+  FormChzzkWeb: TFormChzzkWeb;
 
 procedure CreateGlobalCEFApp;
 
@@ -70,10 +80,11 @@ const
   MaxLength = 1024;
 
 var
+  WSPort: string = '65002';
   SockServer: TSimpleWebsocketServer;
-  ProcessSysChat : Boolean = True;
-  CheckHidden : TDigest;
-  CEFDebugLog : Boolean = False;
+  ProcessSysChat: Boolean = True;
+  CheckHidden: TDigest;
+  CEFDebugLog: Boolean = False;
 
 
 procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
@@ -360,42 +371,63 @@ begin
 end;
 
 
-{ TForm1 }
+{ TFormChzzkWeb }
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TFormChzzkWeb.Button1Click(Sender: TObject);
 begin
   Chromium1.LoadURL('https://chzzk.naver.com');
 end;
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TFormChzzkWeb.ActionWSPortExecute(Sender: TObject);
+var
+  ir:Integer;
+  port:string;
+begin
+  ir:=InputCombo('웹소켓 포트','웹소켓 포트를 지정',['65002','65010','65020','65030','65040']);
+  case ir of
+  1: WSPort:='65002';
+  2: WSPort:='65010';
+  3: WSPort:='65020';
+  4: WSPort:='65030';
+  5: WSPort:='65040';
+  end;
+  if ir<>-1 then
+    begin
+      SockServer.Free;
+      SockServer:=TSimpleWebsocketServer.Create(WSPort);
+      XMLConfig1.SetValue('WS/PORT',WSPort);
+    end;
+end;
+
+procedure TFormChzzkWeb.Button2Click(Sender: TObject);
 begin
   Timer2.Enabled:=not Timer2.Enabled;
   if Timer2.Enabled then
-    Button2.Caption:='Enabled'
+    Button2.Caption:='사용 중'
     else
-      Button2.Caption:='Disabled';
+      Button2.Caption:='대기 중';
 end;
 
-procedure TForm1.Chromium1AfterCreated(Sender: TObject;
+procedure TFormChzzkWeb.Chromium1AfterCreated(Sender: TObject;
   const browser: ICefBrowser);
 begin
   PostMessage(Handle, CEF_AFTERCREATED, 0,0);
 end;
 
-procedure TForm1.Chromium1BeforeClose(Sender: TObject;
+procedure TFormChzzkWeb.Chromium1BeforeClose(Sender: TObject;
   const browser: ICefBrowser);
 begin
   PostMessage(Handle, WM_CLOSE, 0,0);
 end;
 
-procedure TForm1.Chromium1Close(Sender: TObject; const browser: ICefBrowser;
+procedure TFormChzzkWeb.Chromium1Close(Sender: TObject; const browser: ICefBrowser;
   var aAction: TCefCloseBrowserAction);
 begin
   PostMessage(Handle, CEF_DESTROY, 0, 0);
   aAction := cbaDelay;
 end;
 
-procedure TForm1.Chromium1ProcessMessageReceived(Sender: TObject;
+procedure TFormChzzkWeb.Chromium1ProcessMessageReceived(Sender: TObject;
   const browser: ICefBrowser; const frame: ICefFrame;
   sourceProcess: TCefProcessId; const message: ICefProcessMessage; out
   Result: Boolean);
@@ -414,24 +446,43 @@ begin
     end;
 end;
 
-procedure TForm1.FormShow(Sender: TObject);
+procedure TFormChzzkWeb.FormClose(Sender: TObject; var CloseAction: TCloseAction
+  );
 begin
+
+end;
+
+procedure TFormChzzkWeb.FormDestroy(Sender: TObject);
+begin
+  SockServer.Free;
+  if XMLConfig1.Modified then
+    XMLConfig1.SaveToFile('config.xml');
+end;
+
+procedure TFormChzzkWeb.FormShow(Sender: TObject);
+begin
+  MakeCheck('hidden',CheckHidden);
+  if FileExists('config.xml') then
+    XMLConfig1.LoadFromFile('config.xml');
+  WSPort:=XMLConfig1.GetValue('WS/PORT','65002');
+  SockServer:=TSimpleWebsocketServer.Create(WSPort);
+
   if not(Chromium1.CreateBrowser(CEFWindowParent1, '')) then Timer1.Enabled := True;
 end;
 
-procedure TForm1.Timer1Timer(Sender: TObject);
+procedure TFormChzzkWeb.Timer1Timer(Sender: TObject);
 begin
   Timer1.Enabled := False;
   if not(Chromium1.CreateBrowser(CEFWindowParent1, '')) and not(Chromium1.Initialized) then
     Timer1.Enabled := True;
 end;
 
-procedure TForm1.Timer2Timer(Sender: TObject);
+procedure TFormChzzkWeb.Timer2Timer(Sender: TObject);
 begin
   PostMessage(Handle, MSGVISITDOM, 0, 0);
 end;
 
-procedure TForm1.VISITDOM(var Msg: TLMessage);
+procedure TFormChzzkWeb.VISITDOM(var Msg: TLMessage);
 var
   TempMsg : ICefProcessMessage;
 begin
@@ -439,13 +490,13 @@ begin
   Chromium1.SendProcessMessage(PID_RENDERER, TempMsg);
 end;
 
-procedure TForm1.CEFCreated(var Msg: TLMessage);
+procedure TFormChzzkWeb.CEFCreated(var Msg: TLMessage);
 begin
   CEFWindowParent1.UpdateSize;
   Button1.Click;
 end;
 
-procedure TForm1.CEFDestroy(var Msg: TLMessage);
+procedure TFormChzzkWeb.CEFDestroy(var Msg: TLMessage);
 begin
   CEFWindowParent1.Free;
 end;
@@ -467,11 +518,9 @@ begin
 end;
 
 initialization
-  MakeCheck('hidden',CheckHidden);
-  SockServer:=TSimpleWebsocketServer.Create('65002');
+
 
 finalization
-  SockServer.Free;
 
 
 end.
