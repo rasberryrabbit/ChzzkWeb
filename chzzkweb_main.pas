@@ -28,6 +28,7 @@ type
     Button2: TButton;
     CEFWindowParent1: TCEFWindowParent;
     Chromium1: TChromium;
+    Label1: TLabel;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;

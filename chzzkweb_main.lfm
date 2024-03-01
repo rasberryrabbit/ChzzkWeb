@@ -37,6 +37,13 @@ object FormChzzkWeb: TFormChzzkWeb
     TabOrder = 2
     OnClick = Button2Click
   end
+  object Label1: TLabel
+    Left = 16
+    Height = 12
+    Top = 46
+    Width = 120
+    Caption = '19금 상태는 지원 안됨'
+  end
   object Chromium1: TChromium
     OnProcessMessageReceived = Chromium1ProcessMessageReceived
     OnAfterCreated = Chromium1AfterCreated
