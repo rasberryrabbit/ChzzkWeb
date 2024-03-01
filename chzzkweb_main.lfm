@@ -13,8 +13,8 @@ object FormChzzkWeb: TFormChzzkWeb
   OnShow = FormShow
   object CEFWindowParent1: TCEFWindowParent
     Left = 8
-    Height = 469
-    Top = 72
+    Height = 461
+    Top = 80
     Width = 916
     Anchors = [akTop, akLeft, akRight, akBottom]
     TabOrder = 0
@@ -38,11 +38,13 @@ object FormChzzkWeb: TFormChzzkWeb
     OnClick = Button2Click
   end
   object Label1: TLabel
-    Left = 16
-    Height = 12
-    Top = 46
-    Width = 120
-    Caption = '19금 상태는 지원 안됨'
+    Left = 8
+    Height = 34
+    Top = 40
+    Width = 392
+    AutoSize = False
+    Caption = '19금 상태는 지원 안됨(로그인 필요). 채팅을 스크롤하면 작동하지 않음. 코덱이 없기 때문에 영상은 보이지 않음.'
+    WordWrap = True
   end
   object Chromium1: TChromium
     OnProcessMessageReceived = Chromium1ProcessMessageReceived
