@@ -106,7 +106,7 @@ var
 
   CheckItem, CheckItemLast, CheckItemComp: TDigest;
   pBuild, pPrev: pChecksumData;
-  DupCount, DupCountComp: Integer;
+  DupCount, DupCountComp, PrevCount: Integer;
   s : ansistring;
   bMake, bCompare, bDup, bHidden: Boolean;
 
@@ -193,6 +193,8 @@ begin
                              ChatComp:=ChatNode;
                              DupCountComp:=0;
                              pPrev:=CheckPrev.FirstCheck;
+                             if pPrev<>nil then
+                               PrevCount:=pPrev^.dup;
                              MakeCheck('',CheckItemComp);
                              while ChatComp<>nil do
                                begin
@@ -235,19 +237,17 @@ begin
                                             (bHidden and (not pPrev^.IsHidden)) or
                                             CompareCheck(CheckItem,pPrev^.Checksum) then
                                            begin
-                                             if DupCountComp=pPrev^.dup then
-                                               begin
-                                                 pPrev:=CheckPrev.NextCheck;
-                                                 if pPrev=nil then
-                                                   begin
-                                                     bCompare:=False;
-                                                     break;
-                                                   end;
-                                               end else
-                                               if DupCountComp>pPrev^.dup then
+                                             if PrevCount>0 then
+                                               Dec(PrevCount)
+                                               else
                                                  begin
-                                                   ChatFirst:=ChatNode;
-                                                   break;
+                                                   pPrev:=CheckPrev.NextCheck;
+                                                   if pPrev=nil then
+                                                     begin
+                                                       bCompare:=False;
+                                                       break;
+                                                     end else
+                                                       PrevCount:=pPrev^.dup;
                                                  end;
                                            end
                                            else
