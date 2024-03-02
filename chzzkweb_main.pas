@@ -147,6 +147,8 @@ begin
                            begin
                              // stop at hidden chat
                              bMake:=False;
+                             bCompare:=False;
+                             break;
                            end;
                          // build checksum list
                          if bMake then
