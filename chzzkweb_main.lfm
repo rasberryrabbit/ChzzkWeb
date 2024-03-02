@@ -79,14 +79,31 @@ object FormChzzkWeb: TFormChzzkWeb
       Caption = '웹소켓 포트 설정'
       OnExecute = ActionWSPortExecute
     end
+    object ActionOpenChat: TAction
+      Caption = '채팅 파일 열기'
+      OnExecute = ActionOpenChatExecute
+    end
+    object ActionOpenNotify: TAction
+      Caption = '구독/도네이션 파일 열기'
+      OnExecute = ActionOpenNotifyExecute
+    end
   end
   object MainMenu1: TMainMenu
     Left = 200
     Top = 83
     object MenuItem1: TMenuItem
-      Caption = '웹소켓'
+      Caption = '웹소켓(&W)'
       object MenuItem2: TMenuItem
         Action = ActionWSPort
+      end
+    end
+    object MenuItem3: TMenuItem
+      Caption = '파일(&F)'
+      object MenuItem4: TMenuItem
+        Action = ActionOpenChat
+      end
+      object MenuItem5: TMenuItem
+        Action = ActionOpenNotify
       end
     end
   end

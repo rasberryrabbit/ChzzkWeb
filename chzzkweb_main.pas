@@ -22,6 +22,8 @@ type
   { TFormChzzkWeb }
 
   TFormChzzkWeb = class(TForm)
+    ActionOpenNotify: TAction;
+    ActionOpenChat: TAction;
     ActionWSPort: TAction;
     ActionList1: TActionList;
     Button1: TButton;
@@ -32,10 +34,15 @@ type
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
+    MenuItem3: TMenuItem;
+    MenuItem4: TMenuItem;
+    MenuItem5: TMenuItem;
     Timer1: TTimer;
     Timer2: TTimer;
     UniqueInstance1: TUniqueInstance;
     XMLConfig1: TXMLConfig;
+    procedure ActionOpenChatExecute(Sender: TObject);
+    procedure ActionOpenNotifyExecute(Sender: TObject);
     procedure ActionWSPortExecute(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -73,7 +80,7 @@ implementation
 
 uses
   uCEFMiscFunctions, uCEFProcessMessage, uCEFDomVisitor,
-  Windows, uWebsockSimple, uChecksumList;
+  Windows, uWebsockSimple, uChecksumList, ShellApi;
 
 
 {$R *.lfm}
@@ -424,6 +431,16 @@ begin
       XMLConfig1.SetValue('WS/PORT',WSPortChat);
       XMLConfig1.SetValue('WS/PORTSYS',WSPortSys);
     end;
+end;
+
+procedure TFormChzzkWeb.ActionOpenChatExecute(Sender: TObject);
+begin
+  ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode('doc\채팅.html')),nil,nil,SW_SHOWNORMAL);
+end;
+
+procedure TFormChzzkWeb.ActionOpenNotifyExecute(Sender: TObject);
+begin
+  ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode('\doc\도네_구독_메시지.html')),nil,nil,SW_SHOWNORMAL);
 end;
 
 procedure TFormChzzkWeb.Button2Click(Sender: TObject);
