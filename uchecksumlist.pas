@@ -15,7 +15,8 @@ type
 
   TChecksumData = record
     checksum: TDigest;
-    dup:Integer;
+    dup: Integer;
+    IsHidden: Boolean;
   end;
 
   pChecksumData=^TChecksumData;
@@ -178,7 +179,6 @@ end;
 
 initialization
   CheckPrev:=TChecksumList.Create;
-  CheckPrev.Count:=MaxChecksumList;
   CheckBuild:=TChecksumList.Create;
 
 finalization

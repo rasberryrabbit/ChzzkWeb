@@ -108,7 +108,7 @@ var
   pBuild, pPrev: pChecksumData;
   DupCount, DupCountComp: Integer;
   s : ansistring;
-  bMake, bCompare, bDup: Boolean;
+  bMake, bCompare, bDup, bHidden: Boolean;
 
   Msg: ICefProcessMessage;
 
@@ -143,19 +143,21 @@ begin
                          if ChatBottom=nil then
                            ChatBottom:=ChatNode;
 
-                         if (POS(hiddenchatclass,nodeattr)<>0) then
-                           begin
-                             // stop at hidden chat
-                             bMake:=False;
-                             bCompare:=False;
-                             break;
-                           end;
                          // build checksum list
                          if bMake then
                            begin
-                             // make checksum
-                             s:=UTF8Encode(ChatNode.AsMarkup);
-                             MakeCheck(copy(s,1,MaxLength),CheckItem);
+                             bHidden:=False;
+                             if (POS(hiddenchatclass,nodeattr)<>0) then
+                               begin
+                                 CheckItem:=CheckHidden;
+                                 bHidden:=True;
+                               end else
+                               begin
+                                 // make checksum
+                                 s:=UTF8Encode(ChatNode.AsMarkup);
+                                 MakeCheck(copy(s,1,MaxLength),CheckItem);
+                               end;
+
                              bDup:=CompareCheck(CheckItem,CheckItemLast);
                              if bDup then
                                Inc(DupCount)
@@ -171,6 +173,7 @@ begin
                                      begin
                                        pBuild:=CheckBuild.AddCheck;
                                        pBuild^.Checksum:=CheckItem;
+                                       pBuild^.IsHidden:=bHidden;
                                      end
                                    else
                                      bMake:=False;
@@ -189,14 +192,18 @@ begin
                                  nodeattr:=ChatComp.GetElementAttribute('CLASS');
                                  if (POS(chatclass,nodeattr)<>0) then
                                    begin
+                                     bHidden:=False;
                                      if (POS(hiddenchatclass,nodeattr)<>0) then
                                        begin
-                                         // hidden chat
-                                         break;
+                                         CheckItem:=CheckHidden;
+                                         bHidden:=True;
+                                       end else
+                                       begin
+                                         // make checksum
+                                         s:=UTF8Encode(ChatComp.AsMarkup);
+                                         MakeCheck(copy(s,1,MaxLength),CheckItem);
                                        end;
-                                     // make checksum
-                                     s:=UTF8Encode(ChatComp.AsMarkup);
-                                     MakeCheck(copy(s,1,MaxLength),CheckItem);
+
                                      bDup:=CompareCheck(CheckItem,CheckItemComp);
                                      if bDup then
                                        Inc(DupCountComp)
@@ -207,28 +214,40 @@ begin
                                      // compare
                                      if CheckPrev.Count>0 then
                                        begin
-                                         if CompareCheck(CheckItem,pPrev^.Checksum) then
+                                         // get new previous non-hidden
+                                         if  bHidden xor pPrev^.IsHidden then
                                            begin
-                                             if DupCountComp=pPrev^.dup then
-                                               begin
-                                                 pPrev:=CheckPrev.NextCheck;
-                                                 if pPrev=nil then
-                                                   begin
-                                                     bCompare:=False;
-                                                     break;
-                                                   end;
-                                               end else
-                                               if DupCountComp>pPrev^.dup then
+                                               pPrev:=CheckPrev.NextCheck;
+                                               if pPrev=nil then
                                                  begin
-                                                   ChatFirst:=ChatNode;
+                                                   bCompare:=False;
                                                    break;
                                                  end;
-                                           end
-                                           else
-                                           begin
-                                             ChatFirst:=ChatNode;
-                                             break;
                                            end;
+                                         // compare on non-hidden items
+                                         if not (bHidden or pPrev^.IsHidden) then
+                                           if CompareCheck(CheckItem,pPrev^.Checksum) then
+                                             begin
+                                               if DupCountComp=pPrev^.dup then
+                                                 begin
+                                                   pPrev:=CheckPrev.NextCheck;
+                                                   if pPrev=nil then
+                                                     begin
+                                                       bCompare:=False;
+                                                       break;
+                                                     end;
+                                                 end else
+                                                 if DupCountComp>pPrev^.dup then
+                                                   begin
+                                                     ChatFirst:=ChatNode;
+                                                     break;
+                                                   end;
+                                             end
+                                             else
+                                             begin
+                                               ChatFirst:=ChatNode;
+                                               break;
+                                             end;
                                        end
                                        else
                                        begin
