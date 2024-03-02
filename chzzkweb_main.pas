@@ -101,7 +101,7 @@ const
   chatdonation = '_list_donation_';
   chatsubscription = '_list_subscription_';
 var
-  TempChild, ChatNode, ChatBottom, ChatFirst, ChatComp: ICefDomNode;
+  TempChild, ChatNode, ChatBottom, ChatFirst, ChatComp, ChatCon: ICefDomNode;
   nodeattr: ustring;
 
   CheckItem, CheckItemLast, CheckItemComp: TDigest;
@@ -146,12 +146,20 @@ begin
                          // build checksum list
                          if bMake then
                            begin
+                             // check hidden message
                              bHidden:=False;
-                             if (POS(hiddenchatclass,nodeattr)<>0) then
+                             if ChatNode.HasChildren then
                                begin
-                                 CheckItem:=CheckHidden;
-                                 bHidden:=True;
-                               end else
+                                 ChatCon:=ChatNode.FirstChild;
+                                 nodeattr:=ChatCon.GetElementAttribute('CLASS');
+                                 if (POS(hiddenchatclass,nodeattr)<>0) then
+                                   begin
+                                     CheckItem:=CheckHidden;
+                                     bHidden:=True;
+                                     //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<7> ' + ChatCon.AsMarkup);
+                                   end;
+                               end;
+                             if not bHidden then
                                begin
                                  // make checksum
                                  s:=UTF8Encode(ChatNode.AsMarkup);
@@ -192,12 +200,20 @@ begin
                                  nodeattr:=ChatComp.GetElementAttribute('CLASS');
                                  if (POS(chatclass,nodeattr)<>0) then
                                    begin
+                                     // check hidden message
                                      bHidden:=False;
-                                     if (POS(hiddenchatclass,nodeattr)<>0) then
+                                     if ChatComp.HasChildren then
                                        begin
-                                         CheckItem:=CheckHidden;
-                                         bHidden:=True;
-                                       end else
+                                         ChatCon:=ChatComp.FirstChild;
+                                         nodeattr:=ChatCon.GetElementAttribute('CLASS');
+                                         if (POS(hiddenchatclass,nodeattr)<>0) then
+                                           begin
+                                             CheckItem:=CheckHidden;
+                                             bHidden:=True;
+                                             //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<8> ' + ChatCon.AsMarkup);
+                                           end;
+                                       end;
+                                     if not bHidden then
                                        begin
                                          // make checksum
                                          s:=UTF8Encode(ChatComp.AsMarkup);
