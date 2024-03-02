@@ -214,40 +214,31 @@ begin
                                      // compare
                                      if CheckPrev.Count>0 then
                                        begin
-                                         // get new previous non-hidden
-                                         if  bHidden xor pPrev^.IsHidden then
-                                           begin
-                                               pPrev:=CheckPrev.NextCheck;
-                                               if pPrev=nil then
-                                                 begin
-                                                   bCompare:=False;
-                                                   break;
-                                                 end;
-                                           end;
                                          // compare on non-hidden items
-                                         if not (bHidden or pPrev^.IsHidden) then
-                                           if CompareCheck(CheckItem,pPrev^.Checksum) then
-                                             begin
-                                               if DupCountComp=pPrev^.dup then
-                                                 begin
-                                                   pPrev:=CheckPrev.NextCheck;
-                                                   if pPrev=nil then
-                                                     begin
-                                                       bCompare:=False;
-                                                       break;
-                                                     end;
-                                                 end else
-                                                 if DupCountComp>pPrev^.dup then
+                                         if pPrev^.IsHidden or
+                                            (bHidden and (not pPrev^.IsHidden)) or
+                                            CompareCheck(CheckItem,pPrev^.Checksum) then
+                                           begin
+                                             if DupCountComp=pPrev^.dup then
+                                               begin
+                                                 pPrev:=CheckPrev.NextCheck;
+                                                 if pPrev=nil then
                                                    begin
-                                                     ChatFirst:=ChatNode;
+                                                     bCompare:=False;
                                                      break;
                                                    end;
-                                             end
-                                             else
-                                             begin
-                                               ChatFirst:=ChatNode;
-                                               break;
-                                             end;
+                                               end else
+                                               if DupCountComp>pPrev^.dup then
+                                                 begin
+                                                   ChatFirst:=ChatNode;
+                                                   break;
+                                                 end;
+                                           end
+                                           else
+                                           begin
+                                             ChatFirst:=ChatNode;
+                                             break;
+                                           end;
                                        end
                                        else
                                        begin
