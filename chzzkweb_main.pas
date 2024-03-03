@@ -111,9 +111,9 @@ var
   TempChild, ChatNode, ChatBottom, ChatFirst, ChatComp, ChatCon: ICefDomNode;
   nodeattr: ustring;
 
-  CheckItem, CheckItemLast, CheckItemComp: TDigest;
+  CheckItem, CheckItemLast: TDigest;
   pBuild, pPrev: pChecksumData;
-  DupCount, DupCountComp, PrevCount: Integer;
+  DupCount, PrevCount: Integer;
   s : ansistring;
   bMake, bCompare, bDup, bHidden: Boolean;
 
@@ -198,11 +198,9 @@ begin
                          if bCompare then
                            begin
                              ChatComp:=ChatNode;
-                             //DupCountComp:=0;
                              pPrev:=CheckPrev.FirstCheck;
                              if pPrev<>nil then
                                PrevCount:=pPrev^.dup;
-                             //MakeCheck('',CheckItemComp);
                              while ChatComp<>nil do
                                begin
                                  // compare chat only
@@ -229,17 +227,13 @@ begin
                                          MakeCheck(copy(s,1,MaxLength),CheckItem);
                                        end;
 
-                                     {bDup:=CompareCheck(CheckItem,CheckItemComp);
-                                     if bDup then
-                                       Inc(DupCountComp)
-                                       else
-                                         DupCountComp:=0;
-                                     CheckItemComp:=CheckItem;}
-
                                      // compare
                                      if CheckPrev.Count>0 then
                                        begin
                                          // compare on non-hidden items
+                                         // 1. previous = hidden
+                                         // 2. current comp position = hidden, previous = non-hidden
+                                         // 3. equal item checksum
                                          if pPrev^.IsHidden or
                                             (bHidden and (not pPrev^.IsHidden)) or
                                             CompareCheck(CheckItem,pPrev^.Checksum) then
