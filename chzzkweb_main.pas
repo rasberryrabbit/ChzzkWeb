@@ -357,7 +357,7 @@ procedure DOMVisitor_OnDocAvailable(const browser: ICefBrowser; const frame: ICe
 const
   ChzzkURL ='chzzk.naver.com/live/';
 begin
-  if ChatParserLock.TryEnter then
+  if not ChatParserLock.TryEnter then
     Exit;
   try
     // This function is called from a different process.
