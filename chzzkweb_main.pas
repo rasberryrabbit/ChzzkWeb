@@ -80,7 +80,7 @@ implementation
 
 uses
   uCEFMiscFunctions, uCEFProcessMessage, uCEFDomVisitor,
-  Windows, uWebsockSimple, uChecksumList, ShellApi;
+  Windows, uWebsockSimple, uChecksumList, ShellApi, syncobjs;
 
 
 {$R *.lfm}
@@ -96,6 +96,8 @@ var
   ProcessSysChat: Boolean = False;
   CheckHidden: TDigest;
   CEFDebugLog: Boolean = False;
+
+  ChatParserLock: TCriticalSection;
 
 
 procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
@@ -355,17 +357,22 @@ procedure DOMVisitor_OnDocAvailable(const browser: ICefBrowser; const frame: ICe
 const
   ChzzkURL ='chzzk.naver.com/live/';
 begin
-  // This function is called from a different process.
-  // document is only valid inside this function.
-  // As an example, this function only writes the document title to the 'debug.log' file.
-  if POS(ChzzkURL,frame.Url)=0 then
-    exit;
-  if CEFDebugLog then
-    CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, 'document.Title : ' + document.Title);
+  if ChatParserLock.TryEnter then
+    Exit;
+  try
+    // This function is called from a different process.
+    // document is only valid inside this function.
+    // As an example, this function only writes the document title to the 'debug.log' file.
+    if POS(ChzzkURL,frame.Url)=0 then
+      exit;
+    if CEFDebugLog then
+      CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, 'document.Title : ' + document.Title);
 
-  // Simple DOM iteration example
-  SimpleDOMIteration(document, frame);
-
+    // Simple DOM iteration example
+    SimpleDOMIteration(document, frame);
+  finally
+    ChatParserLock.Leave;
+  end;
 end;
 
 procedure GlobalCEFApp_OnProcessMessageReceived(const browser       : ICefBrowser;
@@ -500,6 +507,7 @@ procedure TFormChzzkWeb.FormDestroy(Sender: TObject);
 begin
   SockServerChat.Free;
   SockServerSys.Free;
+  ChatParserLock.Free;
   if XMLConfig1.Modified then
     XMLConfig1.SaveToFile('config.xml');
 end;
@@ -507,6 +515,8 @@ end;
 procedure TFormChzzkWeb.FormShow(Sender: TObject);
 begin
   MakeCheck('hidden',CheckHidden);
+  ChatParserLock:=TCriticalSection.Create;
+
   if FileExists('config.xml') then
     XMLConfig1.LoadFromFile('config.xml');
   WSPortChat:=XMLConfig1.GetValue('WS/PORT','65002');
