@@ -83,6 +83,9 @@
     </SearchPaths>
     <CodeGeneration>
       <TargetProcessor Value="pentiumm"/>
+      <Optimizations>
+        <OptimizationLevel Value="2"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
