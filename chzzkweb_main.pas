@@ -555,7 +555,7 @@ end;
 procedure TFormChzzkWeb.CEFCreated(var Msg: TLMessage);
 begin
   CEFWindowParent1.UpdateSize;
-  // start timer
+  // loading chzzk live
   Button1.Click;
 end;
 
