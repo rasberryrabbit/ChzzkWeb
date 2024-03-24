@@ -22,6 +22,7 @@ type
   { TFormChzzkWeb }
 
   TFormChzzkWeb = class(TForm)
+    ActionDebugLog: TAction;
     ActionOpenNotify: TAction;
     ActionOpenChat: TAction;
     ActionWSPort: TAction;
@@ -37,10 +38,13 @@ type
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
     MenuItem5: TMenuItem;
+    MenuItem6: TMenuItem;
+    MenuItem7: TMenuItem;
     Timer1: TTimer;
     Timer2: TTimer;
     UniqueInstance1: TUniqueInstance;
     XMLConfig1: TXMLConfig;
+    procedure ActionDebugLogExecute(Sender: TObject);
     procedure ActionOpenChatExecute(Sender: TObject);
     procedure ActionOpenNotifyExecute(Sender: TObject);
     procedure ActionWSPortExecute(Sender: TObject);
@@ -56,6 +60,7 @@ type
       const browser: ICefBrowser; const frame: ICefFrame;
       sourceProcess: TCefProcessId; const message: ICefProcessMessage; out
       Result: Boolean);
+
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -431,6 +436,12 @@ begin
   ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode('doc\채팅.html')),nil,nil,SW_SHOWNORMAL);
 end;
 
+procedure TFormChzzkWeb.ActionDebugLogExecute(Sender: TObject);
+begin
+  ActionDebugLog.Checked:=not ActionDebugLog.Checked;
+  CEFDebugLog:=ActionDebugLog.Checked;
+end;
+
 procedure TFormChzzkWeb.ActionOpenNotifyExecute(Sender: TObject);
 begin
   ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode('\doc\도네_구독_메시지.html')),nil,nil,SW_SHOWNORMAL);
@@ -512,6 +523,7 @@ begin
   WSPortChat:=XMLConfig1.GetValue('WS/PORT','65002');
   WSPortSys:=XMLConfig1.GetValue('WS/PORTSYS','65003');
 
+  // start websocket server
   SockServerChat:=TSimpleWebsocketServer.Create(WSPortChat);
   SockServerSys:=TSimpleWebsocketServer.Create(WSPortSys);
 
@@ -520,6 +532,7 @@ end;
 
 procedure TFormChzzkWeb.Timer1Timer(Sender: TObject);
 begin
+  // prepare chromium
   Timer1.Enabled := False;
   if not(Chromium1.CreateBrowser(CEFWindowParent1, '')) and not(Chromium1.Initialized) then
     Timer1.Enabled := True;
@@ -534,6 +547,7 @@ procedure TFormChzzkWeb.VISITDOM(var Msg: TLMessage);
 var
   TempMsg : ICefProcessMessage;
 begin
+  // Send Message to Renderer for parsing
   TempMsg := TCefProcessMessageRef.New(SVISITDOM);
   Chromium1.SendProcessMessage(PID_RENDERER, TempMsg);
 end;
@@ -541,6 +555,7 @@ end;
 procedure TFormChzzkWeb.CEFCreated(var Msg: TLMessage);
 begin
   CEFWindowParent1.UpdateSize;
+  // start timer
   Button1.Click;
 end;
 
@@ -558,7 +573,7 @@ begin
   GlobalCEFApp.OnProcessMessageReceived := @GlobalCEFApp_OnProcessMessageReceived;
   GlobalCEFApp.cache               := 'cache';
   GlobalCEFApp.LogFile             := 'debug.log';
-  GlobalCEFApp.LogSeverity         := LOGSEVERITY_INFO;
+  GlobalCEFApp.LogSeverity         := LOGSEVERITY_ERROR;
   GlobalCEFApp.EnablePrintPreview  := True;
   GlobalCEFApp.EnableGPU           := True;
   GlobalCEFApp.SetCurrentDir       := True;

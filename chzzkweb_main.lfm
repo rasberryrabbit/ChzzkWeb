@@ -87,6 +87,10 @@ object FormChzzkWeb: TFormChzzkWeb
       Caption = '구독/도네이션 파일 열기'
       OnExecute = ActionOpenNotifyExecute
     end
+    object ActionDebugLog: TAction
+      Caption = '디버그 로그 활성화'
+      OnExecute = ActionDebugLogExecute
+    end
   end
   object MainMenu1: TMainMenu
     Left = 200
@@ -104,6 +108,12 @@ object FormChzzkWeb: TFormChzzkWeb
       end
       object MenuItem5: TMenuItem
         Action = ActionOpenNotify
+      end
+    end
+    object MenuItem6: TMenuItem
+      Caption = '디버그(&D)'
+      object MenuItem7: TMenuItem
+        Action = ActionDebugLog
       end
     end
   end
