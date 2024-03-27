@@ -50,6 +50,8 @@ type
     procedure ActionWSPortExecute(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure Chromium1AddressChange(Sender: TObject;
+      const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
     // CEF
     procedure Chromium1AfterCreated(Sender: TObject; const browser: ICefBrowser
       );
@@ -454,6 +456,12 @@ begin
     Button2.Caption:='사용 중'
     else
       Button2.Caption:='대기 중';
+end;
+
+procedure TFormChzzkWeb.Chromium1AddressChange(Sender: TObject;
+  const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
+begin
+  CheckPrev.Clear;
 end;
 
 procedure TFormChzzkWeb.Chromium1AfterCreated(Sender: TObject;
