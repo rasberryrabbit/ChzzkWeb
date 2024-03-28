@@ -152,7 +152,7 @@ begin
                 begin
                   nodeattr:=ChatNode.GetElementAttribute('CLASS');
                   // chat only
-                  if (POS(chatclass,nodeattr)<>0) then
+                  if (POS(chatclass,nodeattr)<>0) and (POS(chatguide,nodeattr)=0) then
                        begin
                          bHidden:=False;
                          // chat
@@ -214,7 +214,7 @@ begin
                                  bHidden:=False;
                                  // compare chat only
                                  nodeattr:=ChatComp.GetElementAttribute('CLASS');
-                                 if (POS(chatclass,nodeattr)<>0) then
+                                 if (POS(chatclass,nodeattr)<>0) and (POS(chatguide,nodeattr)=0) then
                                    begin
                                      // check hidden message
                                      if ChatComp.HasChildren then
