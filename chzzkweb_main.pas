@@ -154,6 +154,7 @@ begin
                   // chat only
                   if (POS(chatclass,nodeattr)<>0) then
                        begin
+                         bHidden:=False;
                          // chat
                          if ChatBottom=nil then
                            ChatBottom:=ChatNode;
@@ -162,7 +163,6 @@ begin
                          if bMake then
                            begin
                              // check hidden message
-                             bHidden:=False;
                              if ChatNode.HasChildren then
                                begin
                                  ChatCon:=ChatNode.FirstChild;
@@ -211,12 +211,12 @@ begin
                                PrevCount:=pPrev^.dup;
                              while ChatComp<>nil do
                                begin
+                                 bHidden:=False;
                                  // compare chat only
                                  nodeattr:=ChatComp.GetElementAttribute('CLASS');
                                  if (POS(chatclass,nodeattr)<>0) then
                                    begin
                                      // check hidden message
-                                     bHidden:=False;
                                      if ChatComp.HasChildren then
                                        begin
                                          ChatCon:=ChatComp.FirstChild;
@@ -240,10 +240,10 @@ begin
                                        begin
                                          // compare on non-hidden items
                                          // 1. previous = hidden
-                                         // 2. current comp position = hidden, previous = non-hidden
+                                         // 2. current = hidden
                                          // 3. equal item checksum
                                          if pPrev^.IsHidden or
-                                            (bHidden and (not pPrev^.IsHidden)) or
+                                            bHidden or
                                             CompareCheck(CheckItem,pPrev^.Checksum) then
                                            begin
                                              if PrevCount>0 then
