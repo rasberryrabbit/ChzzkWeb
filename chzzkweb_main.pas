@@ -58,6 +58,8 @@ type
     procedure Chromium1BeforeClose(Sender: TObject; const browser: ICefBrowser);
     procedure Chromium1Close(Sender: TObject; const browser: ICefBrowser;
       var aAction: TCefCloseBrowserAction);
+    procedure Chromium1LoadingProgressChange(Sender: TObject;
+      const browser: ICefBrowser; const progress: double);
     procedure Chromium1ProcessMessageReceived(Sender: TObject;
       const browser: ICefBrowser; const frame: ICefFrame;
       sourceProcess: TCefProcessId; const message: ICefProcessMessage; out
@@ -485,6 +487,16 @@ begin
   aAction := cbaDelay;
 end;
 
+procedure TFormChzzkWeb.Chromium1LoadingProgressChange(Sender: TObject;
+  const browser: ICefBrowser; const progress: double);
+begin
+  // wait browser loading
+  if progress=1.0 then
+    iCountVisit:=1
+    else
+      iCountVisit:=0;
+end;
+
 procedure TFormChzzkWeb.Chromium1ProcessMessageReceived(Sender: TObject;
   const browser: ICefBrowser; const frame: ICefFrame;
   sourceProcess: TCefProcessId; const message: ICefProcessMessage; out
@@ -558,6 +570,8 @@ var
   TempMsg : ICefProcessMessage;
 begin
   // Send Message to Renderer for parsing
+  if iCountVisit=0 then
+    exit;
   TempMsg := TCefProcessMessageRef.New(SVISITDOM);
   Chromium1.SendProcessMessage(PID_RENDERER, TempMsg);
 end;
