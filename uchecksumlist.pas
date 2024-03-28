@@ -158,9 +158,9 @@ begin
     begin
       Count:=MaxChecksumList;
       system.Move(FList[1],FList[0],sizeof(TChecksumData)*(MaxChecksumList-1));
-      FillChar(FList[Count-1],sizeof(TChecksumData),0);
-      Result:=@(FList[Count-1]);
-      DataIndex:=Count-1;
+      FillChar(FList[MaxChecksumList-1],sizeof(TChecksumData),0);
+      Result:=@(FList[MaxChecksumList-1]);
+      DataIndex:=MaxChecksumList-1;
     end else
     begin
       Result:=@(FList[Count]);
