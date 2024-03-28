@@ -48,6 +48,7 @@ object FormChzzkWeb: TFormChzzkWeb
   end
   object Chromium1: TChromium
     OnProcessMessageReceived = Chromium1ProcessMessageReceived
+    OnLoadingStateChange = Chromium1LoadingStateChange
     OnAddressChange = Chromium1AddressChange
     OnLoadingProgressChange = Chromium1LoadingProgressChange
     OnAfterCreated = Chromium1AfterCreated

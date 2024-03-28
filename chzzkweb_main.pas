@@ -60,6 +60,8 @@ type
       var aAction: TCefCloseBrowserAction);
     procedure Chromium1LoadingProgressChange(Sender: TObject;
       const browser: ICefBrowser; const progress: double);
+    procedure Chromium1LoadingStateChange(Sender: TObject;
+      const browser: ICefBrowser; isLoading, canGoBack, canGoForward: Boolean);
     procedure Chromium1ProcessMessageReceived(Sender: TObject;
       const browser: ICefBrowser; const frame: ICefFrame;
       sourceProcess: TCefProcessId; const message: ICefProcessMessage; out
@@ -492,6 +494,15 @@ procedure TFormChzzkWeb.Chromium1LoadingProgressChange(Sender: TObject;
 begin
   // wait browser loading
   if progress=1.0 then
+    iCountVisit:=1
+    else
+      iCountVisit:=0;
+end;
+
+procedure TFormChzzkWeb.Chromium1LoadingStateChange(Sender: TObject;
+  const browser: ICefBrowser; isLoading, canGoBack, canGoForward: Boolean);
+begin
+  if not isLoading then
     iCountVisit:=1
     else
       iCountVisit:=0;
