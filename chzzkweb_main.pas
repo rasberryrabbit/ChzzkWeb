@@ -335,9 +335,6 @@ var
   TempBody, Res : ICefDomNode;
 begin
   Res:=nil;
-  if iCountVisit>0 then
-    exit;
-  InterLockedIncrement(iCountVisit);
   try
     if (aDocument <> nil) then
       begin
@@ -357,9 +354,9 @@ begin
       end;
   except
     on e : exception do
-      if CustomExceptionHandler('SimpleDOMIteration', e) then raise;
+      if CustomExceptionHandler('SimpleDOMIteration', e) then
+        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, e.Message);
   end;
-  InterLockedDecrement(iCountVisit);
 end;
 
 
@@ -466,7 +463,7 @@ end;
 procedure TFormChzzkWeb.Chromium1AddressChange(Sender: TObject;
   const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
 begin
-  CheckPrev.Clear;
+  //CheckPrev.Clear;
 end;
 
 procedure TFormChzzkWeb.Chromium1AfterCreated(Sender: TObject;

@@ -8,7 +8,7 @@ uses
   Classes, SysUtils;
 
 const
-  MaxChecksumList = 7;
+  MaxChecksumList = 9;
 
 type
   TDigest = array[0..4] of DWord;
