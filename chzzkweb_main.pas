@@ -103,6 +103,7 @@ var
   ProcessSysChat: Boolean = False;
   CheckHidden: TDigest;
   CEFDebugLog: Boolean = False;
+  iCountVisit: Integer = 0;
 
 
 procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
@@ -334,6 +335,9 @@ var
   TempBody, Res : ICefDomNode;
 begin
   Res:=nil;
+  if iCountVisit>0 then
+    exit;
+  InterLockedIncrement(iCountVisit);
   try
     if (aDocument <> nil) then
       begin
@@ -355,6 +359,7 @@ begin
     on e : exception do
       if CustomExceptionHandler('SimpleDOMIteration', e) then raise;
   end;
+  InterLockedDecrement(iCountVisit);
 end;
 
 
