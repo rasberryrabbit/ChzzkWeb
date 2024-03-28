@@ -8,7 +8,7 @@ uses
   Classes, SysUtils;
 
 const
-  MaxChecksumList = 8;
+  MaxChecksumList = 7;
 
 type
   TDigest = array[0..4] of DWord;
@@ -156,6 +156,7 @@ var
 begin
   if Count>=MaxChecksumList then
     begin
+      Count:=MaxChecksumList;
       system.Move(FList[1],FList[0],sizeof(TChecksumData)*(MaxChecksumList-1));
       FillChar(FList[Count-1],sizeof(TChecksumData),0);
       Result:=@(FList[Count-1]);

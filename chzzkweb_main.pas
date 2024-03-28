@@ -191,7 +191,7 @@ begin
                                  pBuild^.dup:=DupCount;
                                end else
                                  begin
-                                   if CheckBuild.DataIndex<MaxChecksumList-1 then
+                                   if CheckBuild.Count<MaxChecksumList then
                                      begin
                                        pBuild:=CheckBuild.AddCheck;
                                        pBuild^.Checksum:=CheckItem;
