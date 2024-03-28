@@ -112,7 +112,7 @@ var
 
 procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
 const
-  nonchatclass = ' live_';
+  nonchatclass = ' live_chatting';
   hiddenchatclass = '_message_is_hidden';
   chatclass = 'live_chatting_list_item';
   chatcontainer = 'live_chatting_list_wrapper';
@@ -156,7 +156,7 @@ begin
                 begin
                   nodeattr:=ChatNode.GetElementAttribute('CLASS');
                   // chat only
-                  if (POS(chatclass,nodeattr)<>0) and (POS(chatguide,nodeattr)=0) then
+                  if (POS(chatclass,nodeattr)<>0){ and (POS(chatguide,nodeattr)=0)} then
                        begin
                          bHidden:=False;
                          // chat
@@ -166,8 +166,14 @@ begin
                          // build checksum list
                          if bMake then
                            begin
+                             // non-chat class
+                             if Pos(nonchatclass,nodeattr)<>0 then
+                               begin
+                                 CheckItem:=CheckHidden;
+                                 bHidden:=True;
+                               end;
                              // check hidden message
-                             if ChatNode.HasChildren then
+                             if (not bHidden) and ChatNode.HasChildren then
                                begin
                                  ChatCon:=ChatNode.FirstChild;
                                  nodeattr:=ChatCon.GetElementAttribute('CLASS');
@@ -218,10 +224,16 @@ begin
                                  bHidden:=False;
                                  // compare chat only
                                  nodeattr:=ChatComp.GetElementAttribute('CLASS');
-                                 if (POS(chatclass,nodeattr)<>0) and (POS(chatguide,nodeattr)=0) then
+                                 if (POS(chatclass,nodeattr)<>0){ and (POS(chatguide,nodeattr)=0)} then
                                    begin
+                                     // non-chat class
+                                     if Pos(nonchatclass,nodeattr)<>0 then
+                                       begin
+                                         CheckItem:=CheckHidden;
+                                         bHidden:=True;
+                                       end;
                                      // check hidden message
-                                     if ChatComp.HasChildren then
+                                     if (not bHidden) and ChatComp.HasChildren then
                                        begin
                                          ChatCon:=ChatComp.FirstChild;
                                          nodeattr:=ChatCon.GetElementAttribute('CLASS');
