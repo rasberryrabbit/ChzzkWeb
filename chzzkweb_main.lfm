@@ -1,11 +1,11 @@
 object FormChzzkWeb: TFormChzzkWeb
   Left = 441
-  Height = 549
+  Height = 577
   Top = 226
-  Width = 933
+  Width = 978
   Caption = 'ChzzkWeb'
-  ClientHeight = 549
-  ClientWidth = 933
+  ClientHeight = 577
+  ClientWidth = 978
   Menu = MainMenu1
   LCLVersion = '3.99.0.0'
   OnClose = FormClose
@@ -13,9 +13,9 @@ object FormChzzkWeb: TFormChzzkWeb
   OnShow = FormShow
   object CEFWindowParent1: TCEFWindowParent
     Left = 8
-    Height = 461
+    Height = 489
     Top = 80
-    Width = 916
+    Width = 961
     Anchors = [akTop, akLeft, akRight, akBottom]
     TabOrder = 0
   end
