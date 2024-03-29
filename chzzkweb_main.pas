@@ -382,7 +382,6 @@ const
 begin
   // This function is called from a different process.
   // document is only valid inside this function.
-  // As an example, this function only writes the document title to the 'debug.log' file.
   if POS(ChzzkURL,frame.Url)=0 then
     exit;
   if CEFDebugLog then
@@ -400,6 +399,7 @@ procedure GlobalCEFApp_OnProcessMessageReceived(const browser       : ICefBrowse
 var
   TempVisitor : TCefFastDomVisitor2;
 begin
+  // browser renderer message
   aHandled := False;
 
   if (browser <> nil) then
@@ -514,6 +514,7 @@ end;
 procedure TFormChzzkWeb.Chromium1LoadingStateChange(Sender: TObject;
   const browser: ICefBrowser; isLoading, canGoBack, canGoForward: Boolean);
 begin
+  // wait browser loading
   if not isLoading then
     iCountVisit:=1
     else
@@ -527,6 +528,7 @@ procedure TFormChzzkWeb.Chromium1ProcessMessageReceived(Sender: TObject;
 var
   s: ustring;
 begin
+  // browser message
   Result := False;
   if message=nil then
     exit;
