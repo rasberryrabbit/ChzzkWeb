@@ -22,6 +22,7 @@ type
   { TFormChzzkWeb }
 
   TFormChzzkWeb = class(TForm)
+    ActionChatTime: TAction;
     ActionDebugLog: TAction;
     ActionOpenNotify: TAction;
     ActionOpenChat: TAction;
@@ -40,10 +41,12 @@ type
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
     MenuItem7: TMenuItem;
+    MenuItem8: TMenuItem;
     Timer1: TTimer;
     Timer2: TTimer;
     UniqueInstance1: TUniqueInstance;
     XMLConfig1: TXMLConfig;
+    procedure ActionChatTimeExecute(Sender: TObject);
     procedure ActionDebugLogExecute(Sender: TObject);
     procedure ActionOpenChatExecute(Sender: TObject);
     procedure ActionOpenNotifyExecute(Sender: TObject);
@@ -91,7 +94,7 @@ implementation
 
 uses
   uCEFMiscFunctions, uCEFProcessMessage, uCEFDomVisitor,
-  Windows, uWebsockSimple, uChecksumList, ShellApi;
+  Windows, uWebsockSimple, uChecksumList, ShellApi, DateUtils;
 
 
 {$R *.lfm}
@@ -108,6 +111,7 @@ var
   CheckHidden: TDigest;
   CEFDebugLog: Boolean = False;
   iCountVisit: Integer = 0;
+  IncludeChatTime: Boolean = False;
 
 
 procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
@@ -462,6 +466,13 @@ begin
   CEFDebugLog:=ActionDebugLog.Checked;
 end;
 
+procedure TFormChzzkWeb.ActionChatTimeExecute(Sender: TObject);
+begin
+  ActionChatTime.Checked:=not ActionChatTime.Checked;
+  IncludeChatTime:=ActionChatTime.Checked;
+  XMLConfig1.SetValue('IncludeTime',IncludeChatTime);
+end;
+
 procedure TFormChzzkWeb.ActionOpenNotifyExecute(Sender: TObject);
 begin
   ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode('\doc\도네_구독_메시지.html')),nil,nil,SW_SHOWNORMAL);
@@ -536,12 +547,16 @@ begin
   if message.Name=SLOGCHAT then
     begin
       s:=message.ArgumentList.GetString(0);
+      if IncludeChatTime then
+        Insert('Time="'+IntToStr(DateTimeToUnix(Now))+'" ', s, 6);
       SockServerChat.BroadcastMsg(UTF8Encode(s));
       Result:=True;
     end else
     if message.Name=SLOGSYS then
       begin
         s:=message.ArgumentList.GetString(0);
+        if IncludeChatTime then
+          Insert('Time="'+IntToStr(DateTimeToUnix(Now))+'" ', s, 6);
         SockServerSys.BroadcastMsg(UTF8Encode(s));
         Result:=True;
       end;
@@ -569,6 +584,8 @@ begin
     XMLConfig1.LoadFromFile('config.xml');
   WSPortChat:=XMLConfig1.GetValue('WS/PORT','65002');
   WSPortSys:=XMLConfig1.GetValue('WS/PORTSYS','65003');
+  IncludeChatTime:=XMLConfig1.GetValue('IncludeTime',False);
+  ActionChatTime.Checked:=IncludeChatTime;
 
   // start websocket server
   SockServerChat:=TSimpleWebsocketServer.Create(WSPortChat);
