@@ -482,7 +482,7 @@ procedure TFormChzzkWeb.Button2Click(Sender: TObject);
 begin
   Timer2.Enabled:=not Timer2.Enabled;
   if Timer2.Enabled then
-    Button2.Caption:='사용 중'
+    Button2.Caption:='실행 중'
     else
       Button2.Caption:='대기 중';
 end;
@@ -532,6 +532,19 @@ begin
       iCountVisit:=0;
 end;
 
+function InsertTime(var s:ustring):Boolean;
+var
+  tp, sp: Integer;
+begin
+  tp:=Pos('<',s);
+  sp:=Pos(' ',s);
+  if (tp+sp>1) and (sp>tp) then
+    begin
+      Inc(sp);
+      Insert('Time="'+IntToStr(DateTimeToUnix(Now))+'" ', s, sp);
+    end;
+end;
+
 procedure TFormChzzkWeb.Chromium1ProcessMessageReceived(Sender: TObject;
   const browser: ICefBrowser; const frame: ICefFrame;
   sourceProcess: TCefProcessId; const message: ICefProcessMessage; out
@@ -548,7 +561,7 @@ begin
     begin
       s:=message.ArgumentList.GetString(0);
       if IncludeChatTime then
-        Insert('Time="'+IntToStr(DateTimeToUnix(Now))+'" ', s, 6);
+        InsertTime(s);
       SockServerChat.BroadcastMsg(UTF8Encode(s));
       Result:=True;
     end else
@@ -556,7 +569,7 @@ begin
       begin
         s:=message.ArgumentList.GetString(0);
         if IncludeChatTime then
-          Insert('Time="'+IntToStr(DateTimeToUnix(Now))+'" ', s, 6);
+          InsertTime(s);
         SockServerSys.BroadcastMsg(UTF8Encode(s));
         Result:=True;
       end;

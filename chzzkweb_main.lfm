@@ -33,7 +33,7 @@ object FormChzzkWeb: TFormChzzkWeb
     Height = 25
     Top = 8
     Width = 75
-    Caption = '사용 중'
+    Caption = '실행 중'
     TabOrder = 2
     OnClick = Button2Click
   end
