@@ -108,7 +108,7 @@ var
   SockServerChat: TSimpleWebsocketServer;
   SockServerSys: TSimpleWebsocketServer;
   ProcessSysChat: Boolean = False;
-  CheckHidden: TDigest;
+  CheckHidden, CheckSys: TDigest;
   CEFDebugLog: Boolean = False;
   iCountVisit: Integer = 0;
   IncludeChatTime: Boolean = False;
@@ -173,8 +173,8 @@ begin
                              // non-chat class
                              if Pos(nonchatclass,nodeattr)<>0 then
                                begin
-                                 CheckItem:=CheckHidden;
-                                 bHidden:=True;
+                                 CheckItem:=CheckSys;
+                                 bHidden:=False;
                                end;
                              // check hidden message
                              if (not bHidden) and ChatNode.HasChildren then
@@ -184,7 +184,7 @@ begin
                                  if (POS(hiddenchatclass,nodeattr)<>0) then
                                    begin
                                      CheckItem:=CheckHidden;
-                                     bHidden:=True;
+                                     bHidden:=False;
                                      //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<7> ' + ChatCon.AsMarkup);
                                    end;
                                end;
@@ -233,8 +233,8 @@ begin
                                      // non-chat class
                                      if Pos(nonchatclass,nodeattr)<>0 then
                                        begin
-                                         CheckItem:=CheckHidden;
-                                         bHidden:=True;
+                                         CheckItem:=CheckSys;
+                                         bHidden:=False;
                                        end;
                                      // check hidden message
                                      if (not bHidden) and ChatComp.HasChildren then
@@ -244,7 +244,7 @@ begin
                                          if (POS(hiddenchatclass,nodeattr)<>0) then
                                            begin
                                              CheckItem:=CheckHidden;
-                                             bHidden:=True;
+                                             bHidden:=False;
                                              //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<8> ' + ChatCon.AsMarkup);
                                            end;
                                        end;
@@ -259,8 +259,8 @@ begin
                                      if CheckPrev.Count>0 then
                                        begin
                                          // compare on non-hidden items
-                                         // 1. previous = hidden
-                                         // 2. current = hidden
+                                         // 1. previous = hidden - disabled
+                                         // 2. current = hidden - disabled
                                          // 3. equal item checksum
                                          if pPrev^.IsHidden or
                                             bHidden or
@@ -592,6 +592,7 @@ end;
 procedure TFormChzzkWeb.FormShow(Sender: TObject);
 begin
   MakeCheck('hidden',CheckHidden);
+  MakeCheck('system',CheckSys);
 
   if FileExists('config.xml') then
     XMLConfig1.LoadFromFile('config.xml');
