@@ -13,38 +13,57 @@ object FormChzzkWeb: TFormChzzkWeb
   OnShow = FormShow
   object CEFWindowParent1: TCEFWindowParent
     Left = 8
-    Height = 489
-    Top = 80
+    Height = 481
+    Top = 88
     Width = 961
     Anchors = [akTop, akLeft, akRight, akBottom]
-    TabOrder = 0
+    TabOrder = 1
   end
-  object Button1: TButton
-    Left = 16
+  object ButtonHome: TButton
+    Left = 8
     Height = 25
-    Top = 8
+    Top = 48
     Width = 75
     Caption = '치지직 홈'
-    TabOrder = 1
-    OnClick = Button1Click
+    TabOrder = 2
+    OnClick = ButtonHomeClick
   end
-  object Button2: TButton
-    Left = 128
+  object ButtonRun: TButton
+    Left = 8
     Height = 25
     Top = 8
     Width = 75
     Caption = '실행 중'
-    TabOrder = 2
-    OnClick = Button2Click
+    TabOrder = 0
+    OnClick = ButtonRunClick
   end
   object Label1: TLabel
-    Left = 8
+    Left = 96
     Height = 34
-    Top = 40
+    Top = 8
     Width = 392
     AutoSize = False
     Caption = '19금 상태는 지원 안됨(로그인 필요). 채팅을 스크롤하면 작동하지 않음. 코덱이 없기 때문에 영상은 보이지 않음.'
     WordWrap = True
+  end
+  object Editurl: TEdit
+    Left = 96
+    Height = 23
+    Top = 50
+    Width = 808
+    Anchors = [akTop, akLeft, akRight]
+    TabOrder = 3
+    OnKeyPress = EditurlKeyPress
+  end
+  object ButtonGo: TButton
+    Left = 912
+    Height = 25
+    Top = 48
+    Width = 56
+    Anchors = [akTop, akRight]
+    Caption = 'Go'
+    TabOrder = 4
+    OnClick = ButtonGoClick
   end
   object Chromium1: TChromium
     OnProcessMessageReceived = Chromium1ProcessMessageReceived
@@ -71,7 +90,7 @@ object FormChzzkWeb: TFormChzzkWeb
   end
   object UniqueInstance1: TUniqueInstance
     Enabled = True
-    Left = 24
+    Left = 496
     Top = 8
   end
   object ActionList1: TActionList

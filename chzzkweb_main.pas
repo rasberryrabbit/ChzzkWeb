@@ -28,10 +28,12 @@ type
     ActionOpenChat: TAction;
     ActionWSPort: TAction;
     ActionList1: TActionList;
-    Button1: TButton;
-    Button2: TButton;
+    ButtonHome: TButton;
+    ButtonRun: TButton;
+    ButtonGo: TButton;
     CEFWindowParent1: TCEFWindowParent;
     Chromium1: TChromium;
+    Editurl: TEdit;
     Label1: TLabel;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
@@ -51,8 +53,9 @@ type
     procedure ActionOpenChatExecute(Sender: TObject);
     procedure ActionOpenNotifyExecute(Sender: TObject);
     procedure ActionWSPortExecute(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure ButtonHomeClick(Sender: TObject);
+    procedure ButtonRunClick(Sender: TObject);
+    procedure ButtonGoClick(Sender: TObject);
     procedure Chromium1AddressChange(Sender: TObject;
       const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
     // CEF
@@ -69,6 +72,7 @@ type
       const browser: ICefBrowser; const frame: ICefFrame;
       sourceProcess: TCefProcessId; const message: ICefProcessMessage; out
       Result: Boolean);
+    procedure EditurlKeyPress(Sender: TObject; var Key: char);
 
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormDestroy(Sender: TObject);
@@ -423,7 +427,7 @@ end;
 
 { TFormChzzkWeb }
 
-procedure TFormChzzkWeb.Button1Click(Sender: TObject);
+procedure TFormChzzkWeb.ButtonHomeClick(Sender: TObject);
 begin
   Chromium1.LoadURL('https://chzzk.naver.com');
 end;
@@ -478,19 +482,24 @@ begin
   ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode('\doc\도네_구독_메시지.html')),nil,nil,SW_SHOWNORMAL);
 end;
 
-procedure TFormChzzkWeb.Button2Click(Sender: TObject);
+procedure TFormChzzkWeb.ButtonRunClick(Sender: TObject);
 begin
   Timer2.Enabled:=not Timer2.Enabled;
   if Timer2.Enabled then
-    Button2.Caption:='실행 중'
+    ButtonRun.Caption:='실행 중'
     else
-      Button2.Caption:='대기 중';
+      ButtonRun.Caption:='대기 중';
+end;
+
+procedure TFormChzzkWeb.ButtonGoClick(Sender: TObject);
+begin
+  Chromium1.LoadURL(Editurl.Text);
 end;
 
 procedure TFormChzzkWeb.Chromium1AddressChange(Sender: TObject;
   const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
 begin
-  //CheckPrev.Clear;
+  Editurl.Text:=url;
 end;
 
 procedure TFormChzzkWeb.Chromium1AfterCreated(Sender: TObject;
@@ -575,6 +584,15 @@ begin
       end;
 end;
 
+procedure TFormChzzkWeb.EditurlKeyPress(Sender: TObject; var Key: char);
+begin
+  if Key=#13 then
+    begin
+      Key:=#0;
+      ButtonGo.Click;
+    end;
+end;
+
 procedure TFormChzzkWeb.FormClose(Sender: TObject; var CloseAction: TCloseAction
   );
 begin
@@ -636,7 +654,7 @@ procedure TFormChzzkWeb.CEFCreated(var Msg: TLMessage);
 begin
   CEFWindowParent1.UpdateSize;
   // loading chzzk live
-  Button1.Click;
+  ButtonHome.Click;
 end;
 
 procedure TFormChzzkWeb.CEFDestroy(var Msg: TLMessage);
