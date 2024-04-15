@@ -16,7 +16,7 @@ type
   TChecksumData = record
     checksum: TDigest;
     dup: Integer;
-    IsHidden: Boolean;
+    //IsHidden: Boolean;
   end;
 
   pChecksumData=^TChecksumData;

@@ -214,7 +214,7 @@ begin
                                      begin
                                        pBuild:=CheckBuild.AddCheck;
                                        pBuild^.Checksum:=CheckItem;
-                                       pBuild^.IsHidden:=bHidden;
+                                       //pBuild^.IsHidden:=bHidden;
                                      end
                                    else
                                      bMake:=False;
@@ -266,7 +266,7 @@ begin
                                          // 1. previous = hidden - disabled
                                          // 2. current = hidden - disabled
                                          // 3. equal item checksum
-                                         if pPrev^.IsHidden or
+                                         if { pPrev^.IsHidden or }
                                             bHidden or
                                             CompareCheck(CheckItem,pPrev^.Checksum) then
                                            begin
