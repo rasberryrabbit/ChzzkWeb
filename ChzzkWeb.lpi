@@ -15,7 +15,7 @@
       <UseVersionInfo Value="True"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="9"/>
-      <BuildNr Value="17"/>
+      <BuildNr Value="18"/>
     </VersionInfo>
     <BuildModes>
       <Item Name="Default" Default="True"/>
@@ -28,6 +28,9 @@
       <FormatVersion Value="2"/>
     </RunParams>
     <RequiredPackages>
+      <Item>
+        <PackageName Value="rxnew"/>
+      </Item>
       <Item>
         <PackageName Value="FCL"/>
       </Item>
