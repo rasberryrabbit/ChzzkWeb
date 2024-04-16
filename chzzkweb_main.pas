@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, XMLConf, Forms, Controls, Graphics, Dialogs, StdCtrls,
   uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants,
   uCEFInterfaces, uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages,
-  ExtCtrls, ActnList, Menus, uCEFWinControl, UniqueInstance;
+  ExtCtrls, ActnList, Menus, uCEFWinControl, UniqueInstance, RxVersInfo;
 
 
 const
@@ -44,6 +44,7 @@ type
     MenuItem6: TMenuItem;
     MenuItem7: TMenuItem;
     MenuItem8: TMenuItem;
+    RxVersionInfo1: TRxVersionInfo;
     Timer1: TTimer;
     Timer2: TTimer;
     UniqueInstance1: TUniqueInstance;
@@ -622,6 +623,8 @@ begin
   // start websocket server
   SockServerChat:=TSimpleWebsocketServer.Create(WSPortChat);
   SockServerSys:=TSimpleWebsocketServer.Create(WSPortSys);
+
+  Caption:='ChzzkWeb '+RxVersionInfo1.FileVersion;
 
   if not(Chromium1.CreateBrowser(CEFWindowParent1, '')) then Timer1.Enabled := True;
 end;

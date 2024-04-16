@@ -153,4 +153,8 @@ object FormChzzkWeb: TFormChzzkWeb
     Left = 202
     Top = 144
   end
+  object RxVersionInfo1: TRxVersionInfo
+    Left = 565
+    Top = 8
+  end
 end
