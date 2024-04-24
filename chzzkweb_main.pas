@@ -526,20 +526,16 @@ procedure TFormChzzkWeb.Chromium1LoadingProgressChange(Sender: TObject;
   const browser: ICefBrowser; const progress: double);
 begin
   // wait browser loading
-  if progress=1.0 then
-    iCountVisit:=1
-    else
-      iCountVisit:=0;
 end;
 
 procedure TFormChzzkWeb.Chromium1LoadingStateChange(Sender: TObject;
   const browser: ICefBrowser; isLoading, canGoBack, canGoForward: Boolean);
 begin
   // wait browser loading
-  if not isLoading then
-    iCountVisit:=1
+  if isLoading then
+    iCountVisit:=0
     else
-      iCountVisit:=0;
+      iCountVisit:=1;
 end;
 
 function InsertTime(var s:ustring):Boolean;
