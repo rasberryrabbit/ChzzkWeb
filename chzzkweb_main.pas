@@ -136,7 +136,7 @@ var
   pBuild, pPrev: pChecksumData;
   DupCount, PrevCount: Integer;
   s : ansistring;
-  bMake, bCompare, bDup, bHidden: Boolean;
+  bMake, bCompare, bDup, bHidden, bSkip: Boolean;
 
   Msg: ICefProcessMessage;
 
@@ -230,9 +230,10 @@ begin
                              while ChatComp<>nil do
                                begin
                                  bHidden:=False;
+                                 bSkip:=False;
                                  // compare chat only
                                  nodeattr:=ChatComp.GetElementAttribute('CLASS');
-                                 if (POS(chatclass,nodeattr)<>0){ and (POS(chatguide,nodeattr)=0)} then
+                                 if (POS(chatclass,nodeattr)<>0) then
                                    begin
                                      // non-chat class
                                      if Pos(nonchatclass,nodeattr)<>0 then
@@ -249,6 +250,7 @@ begin
                                            begin
                                              CheckItem:=CheckHidden;
                                              bHidden:=True;
+                                             bSkip:=True;
                                              //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<8> ' + ChatCon.AsMarkup);
                                            end;
                                        end;
@@ -263,7 +265,7 @@ begin
                                      if CheckPrev.Count>0 then
                                        begin
                                          // equal item checksum
-                                         if CompareCheck(CheckItem,pPrev^.Checksum) then
+                                         if bSkip or CompareCheck(CheckItem,pPrev^.Checksum) then
                                            begin
                                              if PrevCount>0 then
                                                Dec(PrevCount)
