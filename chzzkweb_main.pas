@@ -119,6 +119,41 @@ var
   IncludeChatTime: Boolean = False;
 
 
+function GetChatMarkup(const Node: ICefDomNode):ustring;
+var
+  temp: ICefDomNode;
+  utxt: ustring;
+begin
+  Result:='';
+  temp:=Node.FirstChild;
+  if Assigned(temp) then
+    temp:=temp.FirstChild
+    else
+      exit;
+  if Assigned(temp) then
+    begin
+      if temp.ElementTagName='BUTTON' then
+        begin
+          temp:=temp.FirstChild;
+          // SPAN, USER
+          if Assigned(temp) then
+            begin
+              Result:=temp.ElementInnerText;
+              temp:=temp.NextSibling;
+            end else
+              exit;
+          // SPAN, Chat Text
+          if Assigned(temp) then
+            begin
+              utxt:=temp.ElementInnerText;
+              if utxt='' then
+                utxt:=temp.AsMarkup;
+              Result:=Result+utxt;
+            end;
+        end;
+    end;
+end;
+
 procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
 const
   nonchatclass = ' live_chatting';
@@ -139,7 +174,6 @@ var
   bMake, bCompare, bDup, bHidden: Boolean;
 
   Msg: ICefProcessMessage;
-
 begin
   TempChild:=ANode;
   if TempChild<>nil then
@@ -181,6 +215,7 @@ begin
                                  s:=UTF8Encode(ChatNode.ElementInnerText);
                                  MakeCheck(copy(s,1,MaxLength),CheckItem);
                                  bHidden:=True;
+                                 //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<38> ' + GetSubMarkup(ChatNode));
                                end;
                              // check hidden message
                              if (not bHidden) and ChatNode.HasChildren then
@@ -197,8 +232,9 @@ begin
                              if not bHidden then
                                begin
                                  // make checksum
-                                 s:=UTF8Encode(ChatNode.AsMarkup);
+                                 s:=UTF8Encode(GetChatMarkup(ChatNode));
                                  MakeCheck(copy(s,1,MaxLength),CheckItem);
+                                 //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<30> ' + GetChatMarkup(ChatNode));
                                end;
 
                              bDup:=CompareCheck(CheckItem,CheckItemLast);
@@ -257,7 +293,7 @@ begin
                                      if not bHidden then
                                        begin
                                          // make checksum
-                                         s:=UTF8Encode(ChatComp.AsMarkup);
+                                         s:=UTF8Encode(GetChatMarkup(ChatComp));
                                          MakeCheck(copy(s,1,MaxLength),CheckItem);
                                        end;
 
