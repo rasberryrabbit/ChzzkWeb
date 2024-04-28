@@ -113,7 +113,7 @@ var
   SockServerChat: TSimpleWebsocketServer;
   SockServerSys: TSimpleWebsocketServer;
   ProcessSysChat: Boolean = False;
-  CheckHidden, CheckSys: TDigest;
+  CheckHidden: TDigest;
   CEFDebugLog: Boolean = False;
   iCountVisit: Integer = 0;
   IncludeChatTime: Boolean = False;
@@ -136,7 +136,7 @@ var
   pBuild, pPrev: pChecksumData;
   DupCount, PrevCount: Integer;
   s : ansistring;
-  bMake, bCompare, bDup, bHidden, bSkip: Boolean;
+  bMake, bCompare, bDup, bHidden: Boolean;
 
   Msg: ICefProcessMessage;
 
@@ -178,7 +178,8 @@ begin
                              // non-chat class
                              if Pos(nonchatclass,nodeattr)<>0 then
                                begin
-                                 CheckItem:=CheckSys;
+                                 s:=UTF8Encode(ChatNode.ElementInnerText);
+                                 MakeCheck(copy(s,1,MaxLength),CheckItem);
                                  bHidden:=True;
                                end;
                              // check hidden message
@@ -230,7 +231,6 @@ begin
                              while ChatComp<>nil do
                                begin
                                  bHidden:=False;
-                                 bSkip:=False;
                                  // compare chat only
                                  nodeattr:=ChatComp.GetElementAttribute('CLASS');
                                  if (POS(chatclass,nodeattr)<>0) then
@@ -238,7 +238,8 @@ begin
                                      // non-chat class
                                      if Pos(nonchatclass,nodeattr)<>0 then
                                        begin
-                                         CheckItem:=CheckSys;
+                                         s:=UTF8Encode(ChatComp.ElementInnerText);
+                                         MakeCheck(copy(s,1,MaxLength),CheckItem);
                                          bHidden:=True;
                                        end;
                                      // check hidden message
@@ -248,9 +249,8 @@ begin
                                          nodeattr:=ChatCon.GetElementAttribute('CLASS');
                                          if (POS(hiddenchatclass,nodeattr)<>0) then
                                            begin
-                                             CheckItem:=CheckHidden;
+                                             CheckItem:=pPrev^.Checksum;
                                              bHidden:=True;
-                                             bSkip:=True;
                                              //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<8> ' + ChatCon.AsMarkup);
                                            end;
                                        end;
@@ -265,7 +265,7 @@ begin
                                      if CheckPrev.Count>0 then
                                        begin
                                          // equal item checksum
-                                         if bSkip or CompareCheck(CheckItem,pPrev^.Checksum) then
+                                         if CompareCheck(CheckItem,pPrev^.Checksum) then
                                            begin
                                              if PrevCount>0 then
                                                Dec(PrevCount)
@@ -603,7 +603,6 @@ end;
 procedure TFormChzzkWeb.FormShow(Sender: TObject);
 begin
   MakeCheck('hidden',CheckHidden);
-  MakeCheck('system',CheckSys);
 
   if FileExists('config.xml') then
     XMLConfig1.LoadFromFile('config.xml');
