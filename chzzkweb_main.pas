@@ -165,7 +165,7 @@ begin
                 begin
                   nodeattr:=ChatNode.GetElementAttribute('CLASS');
                   // chat only
-                  if (POS(chatclass,nodeattr)<>0){ and (POS(chatguide,nodeattr)=0)} then
+                  if (POS(chatclass,nodeattr)<>0) then
                        begin
                          bHidden:=False;
                          // chat
@@ -179,7 +179,7 @@ begin
                              if Pos(nonchatclass,nodeattr)<>0 then
                                begin
                                  CheckItem:=CheckSys;
-                                 bHidden:=False;
+                                 bHidden:=True;
                                end;
                              // check hidden message
                              if (not bHidden) and ChatNode.HasChildren then
@@ -189,7 +189,7 @@ begin
                                  if (POS(hiddenchatclass,nodeattr)<>0) then
                                    begin
                                      CheckItem:=CheckHidden;
-                                     bHidden:=False;
+                                     bHidden:=True;
                                      //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<7> ' + ChatCon.AsMarkup);
                                    end;
                                end;
@@ -215,7 +215,6 @@ begin
                                      begin
                                        pBuild:=CheckBuild.AddCheck;
                                        pBuild^.Checksum:=CheckItem;
-                                       //pBuild^.IsHidden:=bHidden;
                                      end
                                    else
                                      bMake:=False;
@@ -239,7 +238,7 @@ begin
                                      if Pos(nonchatclass,nodeattr)<>0 then
                                        begin
                                          CheckItem:=CheckSys;
-                                         bHidden:=False;
+                                         bHidden:=True;
                                        end;
                                      // check hidden message
                                      if (not bHidden) and ChatComp.HasChildren then
@@ -249,7 +248,7 @@ begin
                                          if (POS(hiddenchatclass,nodeattr)<>0) then
                                            begin
                                              CheckItem:=CheckHidden;
-                                             bHidden:=False;
+                                             bHidden:=True;
                                              //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<8> ' + ChatCon.AsMarkup);
                                            end;
                                        end;
@@ -263,13 +262,8 @@ begin
                                      // compare
                                      if CheckPrev.Count>0 then
                                        begin
-                                         // compare on non-hidden items
-                                         // 1. previous = hidden - disabled
-                                         // 2. current = hidden - disabled
-                                         // 3. equal item checksum
-                                         if { pPrev^.IsHidden or }
-                                            bHidden or
-                                            CompareCheck(CheckItem,pPrev^.Checksum) then
+                                         // equal item checksum
+                                         if CompareCheck(CheckItem,pPrev^.Checksum) then
                                            begin
                                              if PrevCount>0 then
                                                Dec(PrevCount)
