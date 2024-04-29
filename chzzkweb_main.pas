@@ -120,7 +120,7 @@ var
   IncludeChatTime: Boolean = False;
 
 
-function GetChatMarkup(const Node: ICefDomNode):ustring;
+function GetChatMarkup(Node: ICefDomNode):ustring;
 var
   temp: ICefDomNode;
   utxt: ustring;
@@ -154,7 +154,7 @@ begin
     Result:=strhidden;
 end;
 
-function GetNonChatMarkup(const Node: ICefDomNode):ustring;
+function GetNonChatMarkup(Node: ICefDomNode):ustring;
 var
   temp: ICefDomNode;
 begin
