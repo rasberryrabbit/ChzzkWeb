@@ -16,6 +16,7 @@ const
   SVISITDOM   = 'V_RENDERER';
   SLOGCHAT = 'V_LOGCHAT';
   SLOGSYS = 'V_LOGSYS';
+  strhidden = 'hidden';
 
 type
 
@@ -150,7 +151,27 @@ begin
         end;
     end;
   if Result='' then
-    Result:='hidden';
+    Result:=strhidden;
+end;
+
+function GetNonChatMarkup(const Node: ICefDomNode):ustring;
+var
+  temp: ICefDomNode;
+begin
+  Result:=strhidden;
+  if Assigned(Node) then
+    begin
+      temp:=Node.FirstChild;
+      if Assigned(temp) then
+        begin
+          temp:=temp.FirstChild;
+          while Assigned(temp) do
+            begin
+              Result:=temp.AsMarkup;
+              temp:=temp.NextSibling;
+            end;
+        end;
+    end;
 end;
 
 procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
@@ -211,7 +232,7 @@ begin
                              // non-chat class
                              if Pos(nonchatclass,nodeattr)<>0 then
                                begin
-                                 s:=UTF8Encode(ChatNode.ElementInnerText);
+                                 s:=UTF8Encode(GetNonChatMarkup(ChatNode));
                                  MakeCheck(copy(s,1,MaxLength),CheckItem);
                                  bHidden:=True;
                                  //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<38> ' + GetSubMarkup(ChatNode));
@@ -273,7 +294,7 @@ begin
                                      // non-chat class
                                      if Pos(nonchatclass,nodeattr)<>0 then
                                        begin
-                                         s:=UTF8Encode(ChatComp.ElementInnerText);
+                                         s:=UTF8Encode(GetNonChatMarkup(ChatComp));
                                          MakeCheck(copy(s,1,MaxLength),CheckItem);
                                          bHidden:=True;
                                        end;
@@ -329,6 +350,9 @@ begin
                                    end;
                                  ChatComp:=ChatComp.PreviousSibling;
                                end;
+                             // check exact count on pattern
+                             if bCompare then
+                               ChatFirst:=ChatNode;
                            end;
                        end;
                   ChatNode:=ChatNode.PreviousSibling;
@@ -637,7 +661,7 @@ end;
 
 procedure TFormChzzkWeb.FormShow(Sender: TObject);
 begin
-  MakeCheck('hidden',CheckHidden);
+  MakeCheck(strhidden,CheckHidden);
 
   if FileExists('config.xml') then
     XMLConfig1.LoadFromFile('config.xml');
