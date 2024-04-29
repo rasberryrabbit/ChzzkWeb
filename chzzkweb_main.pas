@@ -125,33 +125,32 @@ var
   utxt: ustring;
 begin
   Result:='';
-  temp:=Node.FirstChild;
-  if Assigned(temp) then
-    temp:=temp.FirstChild
-    else
-      exit;
-  if Assigned(temp) then
+  if Assigned(Node) then
     begin
-      if temp.ElementTagName='BUTTON' then
+      temp:=Node.FirstChild;
+      if Assigned(temp) then
         begin
           temp:=temp.FirstChild;
-          // SPAN, USER
           if Assigned(temp) then
             begin
-              Result:=temp.ElementInnerText;
-              temp:=temp.NextSibling;
-            end else
-              exit;
-          // SPAN, Chat Text
-          if Assigned(temp) then
-            begin
-              utxt:=temp.ElementInnerText;
-              if utxt='' then
-                utxt:=temp.AsMarkup;
-              Result:=Result+utxt;
+              if temp.ElementTagName='BUTTON' then
+                begin
+                  temp:=temp.FirstChild;
+                  // SPAN, USER
+                  if Assigned(temp) then
+                    begin
+                      Result:=temp.AsMarkup;
+                      temp:=temp.NextSibling;
+                    end;
+                  // SPAN, Chat Text
+                  if Assigned(temp) then
+                    Result:=Result+temp.AsMarkup;
+                end;
             end;
         end;
     end;
+  if Result='' then
+    Result:='hidden';
 end;
 
 procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
