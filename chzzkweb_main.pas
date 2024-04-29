@@ -443,8 +443,8 @@ const
 begin
   // This function is called from a different process.
   // document is only valid inside this function.
-  if POS(ChzzkURL,frame.Url)=0 then
-    exit;
+  //if POS(ChzzkURL,frame.Url)=0 then
+  //  exit;
   if CEFDebugLog then
     CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, 'document.Title : ' + document.Title);
 
@@ -578,16 +578,20 @@ procedure TFormChzzkWeb.Chromium1LoadingProgressChange(Sender: TObject;
   const browser: ICefBrowser; const progress: double);
 begin
   // wait browser loading
+  //if progress<1.0 then
+  //  iCountVisit:=0
+  //  else
+  //    iCountVisit:=1;
 end;
 
 procedure TFormChzzkWeb.Chromium1LoadingStateChange(Sender: TObject;
   const browser: ICefBrowser; isLoading, canGoBack, canGoForward: Boolean);
 begin
   // wait browser loading
-  if isLoading then
-    iCountVisit:=0
-    else
-      iCountVisit:=1;
+  //if isLoading then
+  //  iCountVisit:=0
+  //  else
+  //    iCountVisit:=1;
 end;
 
 function InsertTime(var s:ustring):Boolean;
@@ -694,8 +698,8 @@ var
   TempMsg : ICefProcessMessage;
 begin
   // Send Message to Renderer for parsing
-  if iCountVisit=0 then
-    exit;
+  //if iCountVisit=0 then
+  //  exit;
   TempMsg := TCefProcessMessageRef.New(SVISITDOM);
   Chromium1.SendProcessMessage(PID_RENDERER, TempMsg);
 end;
@@ -722,7 +726,7 @@ begin
   GlobalCEFApp.cache               := 'cache';
   GlobalCEFApp.LogFile             := 'debug.log';
   GlobalCEFApp.LogSeverity         := LOGSEVERITY_ERROR;
-  GlobalCEFApp.EnablePrintPreview  := True;
+  GlobalCEFApp.EnablePrintPreview  := False;
   GlobalCEFApp.EnableGPU           := True;
   GlobalCEFApp.SetCurrentDir       := True;
   //GlobalCEFApp.SingleProcess       := True;
