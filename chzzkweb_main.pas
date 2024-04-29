@@ -158,18 +158,15 @@ function GetNonChatMarkup(const Node: ICefDomNode):ustring;
 var
   temp: ICefDomNode;
 begin
-  Result:=strhidden;
+  Result:='subscribe';
   if Assigned(Node) then
     begin
       temp:=Node.FirstChild;
       if Assigned(temp) then
         begin
           temp:=temp.FirstChild;
-          while Assigned(temp) do
-            begin
-              Result:=temp.AsMarkup;
-              temp:=temp.NextSibling;
-            end;
+          if Assigned(temp) then
+            Result:=temp.AsMarkup;
         end;
     end;
 end;
@@ -338,20 +335,20 @@ begin
                                            end
                                            else
                                            begin
-                                             ChatFirst:=ChatNode;
+                                             //ChatFirst:=ChatNode;
                                              break;
                                            end;
                                        end
                                        else
                                        begin
-                                         ChatFirst:=ChatNode;
+                                         //ChatFirst:=ChatNode;
                                          break;
                                        end;
                                    end;
                                  ChatComp:=ChatComp.PreviousSibling;
                                end;
                              // check exact count on pattern
-                             if bCompare then
+                             if bCompare and Assigned(ChatComp) then
                                ChatFirst:=ChatNode;
                            end;
                        end;
