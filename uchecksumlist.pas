@@ -8,7 +8,7 @@ uses
   Classes, SysUtils;
 
 const
-  MaxChecksumList = 9;
+  MaxChecksumList = 5;
 
 type
   TDigest = array[0..4] of DWord;
@@ -46,7 +46,7 @@ type
       property NextCheck:pChecksumData read GetNextCheck;
   end;
 
-  procedure MakeCheck(const s:rawbytestring; var aDigest: TDigest);
+  procedure MakeCheck(const s:UnicodeString ; var aDigest: TDigest);
   function CompareCheck(const a, b:TDigest):Boolean;
   function CheckString(const a:TDigest):string;
 
@@ -60,7 +60,7 @@ uses
   DCPripemd160;
 
 
-procedure MakeCheck(const s:rawbytestring; var aDigest: TDigest);
+procedure MakeCheck(const s:UnicodeString; var aDigest: TDigest);
 var
   HashCalc: TDCP_ripemd160;
 begin
@@ -70,7 +70,7 @@ begin
     HashCalc.Init;
     if Length(s)>0 then
       begin
-        HashCalc.Update(s[1],Length(s));
+        HashCalc.Update(s[1],Length(s)*sizeof(WideChar));
         HashCalc.Final(aDigest);
       end;
   finally
