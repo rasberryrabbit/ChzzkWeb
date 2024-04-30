@@ -17,12 +17,13 @@ uses
 
 {$R *.res}
 
-{$SetPEFlags IMAGE_FILE_LARGE_ADDRESS_AWARE}
+//{$SetPEFlags IMAGE_FILE_LARGE_ADDRESS_AWARE}
 
 begin
   CreateGlobalCEFApp;
 
   RequireDerivedFormResource:=True;
+  IsMultiThread:=True;
   Application.Scaled:=True;
   if GlobalCEFApp.StartMainProcess then begin
     Application.Initialize;

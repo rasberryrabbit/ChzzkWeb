@@ -14,8 +14,7 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MinorVersionNr Value="1"/>
-      <RevisionNr Value="9"/>
-      <BuildNr Value="31"/>
+      <RevisionNr Value="10"/>
     </VersionInfo>
     <BuildModes>
       <Item Name="Default" Default="True"/>
@@ -28,6 +27,9 @@
       <FormatVersion Value="2"/>
     </RunParams>
     <RequiredPackages>
+      <Item>
+        <PackageName Value="ExceptionLogger"/>
+      </Item>
       <Item>
         <PackageName Value="rxnew"/>
       </Item>
@@ -86,6 +88,9 @@
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
+      <Checks>
+        <StackChecks Value="True"/>
+      </Checks>
       <TargetProcessor Value="pentiumm"/>
       <Optimizations>
         <OptimizationLevel Value="2"/>
