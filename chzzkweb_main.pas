@@ -451,13 +451,6 @@ begin
           ExtractChat(TempBody.FirstChild,Res, aFrame);
         end;
     end;
-  if CEFDebugLog then
-    begin
-      if Res=nil then
-        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '===== Cannot Find Chat Node =====')
-        else
-          CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '===== End of Chat Node =====');
-    end;
 end;
 
 
