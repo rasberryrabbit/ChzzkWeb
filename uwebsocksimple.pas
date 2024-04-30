@@ -76,6 +76,7 @@ end;
 destructor TSimpleWebsocketServer.Destroy;
 begin
   fServer.Free;
+  Sleep(100);
   inherited Destroy;
 end;
 
