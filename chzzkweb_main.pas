@@ -171,7 +171,26 @@ begin
     end;
 end;
 
-procedure ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame);
+
+function GetElementAttr(const Node: ICefDomNode):ustring;
+var
+  attrlist: TStringList;
+begin
+  attrlist:=TStringList.Create;
+  try
+    Node.GetElementAttributes(TStrings(attrlist));
+    Result:=attrlist.Text;
+  finally
+    attrlist.Free;
+  end;
+end;
+
+function CheckElementAttr(const str: ustring; const Node: ICefDomNode):Boolean;
+begin
+  Result:=Pos(str,GetElementAttr(Node))<>0;
+end;
+
+function ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame):Boolean;
 const
   nonchatclass = ' live_chatting';
   hiddenchatclass = '_message_is_hidden';
@@ -187,34 +206,56 @@ var
   CheckItem, CheckItemLast: TDigest;
   pBuild, pPrev: pChecksumData;
   DupCount, PrevCount: Integer;
-  s : ansistring;
+  s: UnicodeString;
   bMake, bCompare, bDup, bHidden: Boolean;
 
   Msg: ICefProcessMessage;
 begin
+  Result:=False;
   TempChild:=ANode;
+  try
   if TempChild<>nil then
     begin
-      while TempChild<> nil do
+      // search chat list
+      while TempChild<>nil do
         begin
-          // search chat DOM
-          if (TempChild.Name='DIV') and (POS(chatcontainer,TempChild.GetElementAttribute('CLASS'))<>0) then
+          if (TempChild.Name='DIV') and CheckElementAttr(chatcontainer,TempChild) then
             begin
               Res:=TempChild;
+              Result:=True;
+              break;
+            end;
+          if TempChild.HasChildren then
+            begin
+              if ExtractChat(TempChild.FirstChild,Res,aFrame) then
+                break;
+            end;
+          TempChild:=TempChild.NextSibling;
+        end;
+      // process chat list
+      if Res<>nil then
+        begin
+          TempChild:=Res;
+          Res:=nil;
+          // search chat DOM
+          if (TempChild.Name='DIV') and CheckElementAttr(chatcontainer, TempChild) then
+            begin
+              //Res:=TempChild;
               ChatNode:=TempChild.LastChild;
 
               CheckBuild.Clear;
-              ChatBottom:=nil;
+              ChatBottom:=ChatNode;
               ChatFirst:=nil;
               bCompare:=True;
               bMake:=True;
               bDup:=False;
               MakeCheck('',CheckItemLast);
               DupCount:=0;
-              // log
+              // chat log
+              // Don't use GetElementAttribute(), it makes random error.
               while ChatNode<>nil do
                 begin
-                  nodeattr:=ChatNode.GetElementAttribute('CLASS');
+                  nodeattr:=ChatNode.AsMarkup;
                   // chat only
                   if (POS(chatclass,nodeattr)<>0) then
                        begin
@@ -229,27 +270,15 @@ begin
                              // non-chat class
                              if Pos(nonchatclass,nodeattr)<>0 then
                                begin
-                                 s:=UTF8Encode(GetNonChatMarkup(ChatNode));
+                                 s:=GetNonChatMarkup(ChatNode);
                                  MakeCheck(copy(s,1,MaxLength),CheckItem);
                                  bHidden:=True;
                                  //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<38> ' + GetSubMarkup(ChatNode));
                                end;
-                             // check hidden message
-                             if (not bHidden) and ChatNode.HasChildren then
-                               begin
-                                 ChatCon:=ChatNode.FirstChild;
-                                 nodeattr:=ChatCon.GetElementAttribute('CLASS');
-                                 if (POS(hiddenchatclass,nodeattr)<>0) then
-                                   begin
-                                     CheckItem:=CheckHidden;
-                                     bHidden:=True;
-                                     //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<7> ' + ChatCon.AsMarkup);
-                                   end;
-                               end;
                              if not bHidden then
                                begin
                                  // make checksum
-                                 s:=UTF8Encode(GetChatMarkup(ChatNode));
+                                 s:=GetChatMarkup(ChatNode);
                                  MakeCheck(copy(s,1,MaxLength),CheckItem);
                                  //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<30> ' + GetChatMarkup(ChatNode));
                                end;
@@ -275,6 +304,7 @@ begin
                                  end;
                            end;
                          // compare checksum
+                         // Don't use GetElementAttribute(), it makes random error.
                          if bCompare then
                            begin
                              ChatComp:=ChatNode;
@@ -285,32 +315,35 @@ begin
                                begin
                                  bHidden:=False;
                                  // compare chat only
-                                 nodeattr:=ChatComp.GetElementAttribute('CLASS');
+                                 nodeattr:=ChatComp.AsMarkup;
                                  if (POS(chatclass,nodeattr)<>0) then
                                    begin
                                      // non-chat class
                                      if Pos(nonchatclass,nodeattr)<>0 then
                                        begin
-                                         s:=UTF8Encode(GetNonChatMarkup(ChatComp));
+                                         s:=GetNonChatMarkup(ChatComp);
                                          MakeCheck(copy(s,1,MaxLength),CheckItem);
                                          bHidden:=True;
                                        end;
                                      // check hidden message
-                                     if (not bHidden) and ChatComp.HasChildren then
+                                     if not bHidden then
                                        begin
-                                         ChatCon:=ChatComp.FirstChild;
-                                         nodeattr:=ChatCon.GetElementAttribute('CLASS');
-                                         if (POS(hiddenchatclass,nodeattr)<>0) then
+                                         ChatCon:=ChatComp.GetFirstChild;
+                                         if Assigned(ChatCon) then
                                            begin
-                                             CheckItem:=pPrev^.Checksum;
-                                             bHidden:=True;
-                                             //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<8> ' + ChatCon.AsMarkup);
+                                             nodeattr:=ChatCon.AsMarkup;
+                                             if CheckElementAttr(hiddenchatclass,ChatCon) then
+                                               begin
+                                                 CheckItem:=pPrev^.Checksum;
+                                                 bHidden:=True;
+                                                 //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<8> ' + ChatCon.AsMarkup);
+                                               end;
                                            end;
                                        end;
                                      if not bHidden then
                                        begin
                                          // make checksum
-                                         s:=UTF8Encode(GetChatMarkup(ChatComp));
+                                         s:=GetChatMarkup(ChatComp);
                                          MakeCheck(copy(s,1,MaxLength),CheckItem);
                                        end;
 
@@ -335,21 +368,18 @@ begin
                                            end
                                            else
                                            begin
-                                             //ChatFirst:=ChatNode;
+                                             ChatFirst:=ChatNode;
                                              break;
                                            end;
                                        end
                                        else
                                        begin
-                                         //ChatFirst:=ChatNode;
+                                         ChatFirst:=ChatNode;
                                          break;
                                        end;
                                    end;
                                  ChatComp:=ChatComp.PreviousSibling;
                                end;
-                             // check exact count on pattern
-                             if bCompare and Assigned(ChatComp) then
-                               ChatFirst:=ChatNode;
                            end;
                        end;
                   ChatNode:=ChatNode.PreviousSibling;
@@ -360,7 +390,7 @@ begin
                 ChatNode:=ChatFirst;
                 while ChatNode<>nil do
                   begin
-                    nodeattr:=ChatNode.GetElementAttribute('CLASS');
+                    nodeattr:=ChatNode.AsMarkup;
                     if (POS(chatclass,nodeattr)<>0) then
                     begin
                       if (Pos(chatdonation,nodeattr)<>0) or
@@ -369,7 +399,7 @@ begin
                           // subscription, donation
                           Msg:=TCefProcessMessageRef.New(SLOGSYS);
                           try
-                            Msg.ArgumentList.SetString(0,ChatNode.AsMarkup);
+                            Msg.ArgumentList.SetString(0,nodeattr);
                             if (aFrame<>nil) and aFrame.IsValid then
                               aFrame.SendProcessMessage(PID_BROWSER,Msg);
                           finally
@@ -378,12 +408,12 @@ begin
                           if CEFDebugLog then
                             CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<5> ' + ChatNode.ElementInnerText);
                         end else
-                        if (Pos(hiddenchatclass,nodeattr)=0) and (Pos(chatguide,nodeattr)=0) then
+                        if (Pos(chatguide,nodeattr)=0) then
                         begin
                           // chatting
                           Msg:=TCefProcessMessageRef.New(SLOGCHAT);
                           try
-                            Msg.ArgumentList.SetString(0,ChatNode.AsMarkup);
+                            Msg.ArgumentList.SetString(0,nodeattr);
                             if (aFrame<>nil) and aFrame.IsValid then
                               aFrame.SendProcessMessage(PID_BROWSER,Msg);
                           finally
@@ -398,13 +428,13 @@ begin
                     ChatNode:=ChatNode.NextSibling;
                   end;
             end;
-          if (Res=nil) and TempChild.HasChildren then
-            ExtractChat(TempChild.FirstChild,Res,aFrame);
-          if Res<>nil then
-            break;
-          TempChild:=TempChild.NextSibling;
         end;
     end;
+  except
+    on e: exception do
+      if CustomExceptionHandler('',e) then
+        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<30> ' + e.Message);
+  end;
 end;
 
 procedure SimpleDOMIteration(const aDocument: ICefDomDocument; const aFrame: ICefFrame);
@@ -412,28 +442,22 @@ var
   TempBody, Res : ICefDomNode;
 begin
   Res:=nil;
-  try
-    if (aDocument <> nil) then
-      begin
-        // body
-        TempBody := aDocument.Body;
-        if TempBody <> nil then
-          begin
-            ExtractChat(TempBody.FirstChild,Res, aFrame);
-          end;
-      end;
-    if CEFDebugLog then
-      begin
-        if Res=nil then
-          CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '===== Cannot Find Chat Node =====')
-          else
-            CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '===== End of Chat Node =====');
-      end;
-  except
-    on e : exception do
-      if CustomExceptionHandler('SimpleDOMIteration', e) then
-        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, e.Message);
-  end;
+  if (aDocument <> nil) then
+    begin
+      // body
+      TempBody := aDocument.Body;
+      if TempBody <> nil then
+        begin
+          ExtractChat(TempBody.FirstChild,Res, aFrame);
+        end;
+    end;
+  if CEFDebugLog then
+    begin
+      if Res=nil then
+        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '===== Cannot Find Chat Node =====')
+        else
+          CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '===== End of Chat Node =====');
+    end;
 end;
 
 
@@ -443,13 +467,16 @@ const
 begin
   // This function is called from a different process.
   // document is only valid inside this function.
-  //if POS(ChzzkURL,frame.Url)=0 then
-  //  exit;
-  if CEFDebugLog then
-    CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, 'document.Title : ' + document.Title);
+  if Assigned(browser) and Assigned(frame) then
+    begin
+      if POS(ChzzkURL,frame.Url)=0 then
+        exit;
+      if CEFDebugLog then
+        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, 'document.Title : ' + document.Title);
 
-  // Simple DOM iteration example
-  SimpleDOMIteration(document, frame);
+      // Simple DOM iteration example
+      SimpleDOMIteration(document, frame);
+    end;
 end;
 
 procedure GlobalCEFApp_OnProcessMessageReceived(const browser       : ICefBrowser;
@@ -578,20 +605,20 @@ procedure TFormChzzkWeb.Chromium1LoadingProgressChange(Sender: TObject;
   const browser: ICefBrowser; const progress: double);
 begin
   // wait browser loading
-  //if progress<1.0 then
-  //  iCountVisit:=0
-  //  else
-  //    iCountVisit:=1;
+  if progress<1.0 then
+    iCountVisit:=0
+    else
+      iCountVisit:=1;
 end;
 
 procedure TFormChzzkWeb.Chromium1LoadingStateChange(Sender: TObject;
   const browser: ICefBrowser; isLoading, canGoBack, canGoForward: Boolean);
 begin
   // wait browser loading
-  //if isLoading then
-  //  iCountVisit:=0
-  //  else
-  //    iCountVisit:=1;
+  if isLoading then
+    iCountVisit:=0
+    else
+      iCountVisit:=1;
 end;
 
 function InsertTime(var s:ustring):Boolean;
@@ -698,8 +725,8 @@ var
   TempMsg : ICefProcessMessage;
 begin
   // Send Message to Renderer for parsing
-  //if iCountVisit=0 then
-  //  exit;
+  if iCountVisit=0 then
+    exit;
   TempMsg := TCefProcessMessageRef.New(SVISITDOM);
   Chromium1.SendProcessMessage(PID_RENDERER, TempMsg);
 end;
@@ -733,7 +760,6 @@ begin
 end;
 
 initialization
-
 
 finalization
 
