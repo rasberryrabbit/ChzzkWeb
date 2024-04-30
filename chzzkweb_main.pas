@@ -99,7 +99,7 @@ procedure CreateGlobalCEFApp;
 implementation
 
 uses
-  uCEFMiscFunctions, uCEFProcessMessage, uCEFDomVisitor,
+  uCEFMiscFunctions, uCEFProcessMessage, uCEFDomVisitor, uCEFStringMap,
   Windows, uWebsockSimple, uChecksumList, ShellApi, DateUtils;
 
 
@@ -171,17 +171,16 @@ begin
     end;
 end;
 
-
 function GetElementAttr(const Node: ICefDomNode):ustring;
 var
-  attrlist: TStringList;
+  attr: ICefStringMap;
 begin
-  attrlist:=TStringList.Create;
+  attr:=TCefStringMapOwn.Create;
   try
-    Node.GetElementAttributes(TStrings(attrlist));
-    Result:=attrlist.Text;
+    Node.GetElementAttributes(attr);
+    Result:=attr.Find('class');
   finally
-    attrlist.Free;
+    attr:=nil;
   end;
 end;
 
