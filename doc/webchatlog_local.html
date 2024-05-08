@@ -37,15 +37,11 @@ $(document).ready(function(){
 <script type="text/javascript">
 //
 var randomcolor=1;
-var chatsock = new ReconnectingWebSocket("ws://localhost:65002","chat");
-chatsock.reconnectInterval=2000;
-chatsock.onmessage = function (event) {
+var chatsock1 = new ReconnectingWebSocket("ws://localhost:65002","chat");
+chatsock1.reconnectInterval=1000;
+chatsock1.onmessage = function (event) {
     var div = $("#chatbox");
     chatline=$(event.data);
-    // disable random color
-    //if(!randomcolor) {
-    //  chatline.find('.chat-author__display-name').attr('style','');
-    //}
     div.append(chatline);
     if (div.children('div').length>10) {
       div.children('div')[0].remove();
@@ -58,15 +54,11 @@ chatsock.onmessage = function (event) {
     }, 30000);
 }
 
-var chatsock = new ReconnectingWebSocket("ws://localhost:65003","chat");
-chatsock.reconnectInterval=2000;
-chatsock.onmessage = function (event) {
+var chatsock2 = new ReconnectingWebSocket("ws://localhost:65003","chat");
+chatsock2.reconnectInterval=1000;
+chatsock2.onmessage = function (event) {
     var div = $("#chatbox");
     chatline=$(event.data);
-    // disable random color
-    //if(!randomcolor) {
-    //  chatline.find('.chat-author__display-name').attr('style','');
-    //}
     div.append(chatline);
     if (div.children('div').length>10) {
       div.children('div')[0].remove();
