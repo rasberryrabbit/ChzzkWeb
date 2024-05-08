@@ -38,9 +38,9 @@ $(document).ready(function(){
 //
 var randomcolor=1;
 var itemmax=50;
-var chatsock = new ReconnectingWebSocket("ws://localhost:65002","chat");
-chatsock.reconnectInterval=2000;
-chatsock.onmessage = function (event) {
+var chatsock1 = new ReconnectingWebSocket("ws://localhost:65002","chat");
+chatsock1.reconnectInterval=1000;
+chatsock1.onmessage = function (event) {
     var div = $("#chatbox");
     chatline=$(event.data);
     // disable random color
@@ -59,9 +59,9 @@ chatsock.onmessage = function (event) {
     }
 }
 
-var chatsock = new ReconnectingWebSocket("ws://localhost:65003","chat");
-chatsock.reconnectInterval=2000;
-chatsock.onmessage = function (event) {
+var chatsock2 = new ReconnectingWebSocket("ws://localhost:65003","chat");
+chatsock2.reconnectInterval=1000;
+chatsock2.onmessage = function (event) {
     var div = $("#chatbox");
     chatline=$(event.data);
     // disable random color
