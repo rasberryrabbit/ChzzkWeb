@@ -23,6 +23,7 @@ type
   { TFormChzzkWeb }
 
   TFormChzzkWeb = class(TForm)
+    ActionOpenChatFull: TAction;
     ActionChatTime: TAction;
     ActionDebugLog: TAction;
     ActionOpenNotify: TAction;
@@ -45,6 +46,7 @@ type
     MenuItem6: TMenuItem;
     MenuItem7: TMenuItem;
     MenuItem8: TMenuItem;
+    MenuItem9: TMenuItem;
     RxVersionInfo1: TRxVersionInfo;
     Timer1: TTimer;
     Timer2: TTimer;
@@ -53,6 +55,7 @@ type
     procedure ActionChatTimeExecute(Sender: TObject);
     procedure ActionDebugLogExecute(Sender: TObject);
     procedure ActionOpenChatExecute(Sender: TObject);
+    procedure ActionOpenChatFullExecute(Sender: TObject);
     procedure ActionOpenNotifyExecute(Sender: TObject);
     procedure ActionWSPortExecute(Sender: TObject);
     procedure ButtonHomeClick(Sender: TObject);
@@ -118,6 +121,9 @@ var
   CEFDebugLog: Boolean = False;
   iCountVisit: Integer = 0;
   IncludeChatTime: Boolean = False;
+  chatlog_full: string = 'doc\webchatlog_list.html';
+  chatlog_donation: string = '\doc\도네_구독_메시지.html';
+  chatlog_chatonly: string = 'doc\채팅.html';
 
 
 function GetChatMarkup(Node: ICefDomNode):ustring;
@@ -533,7 +539,12 @@ end;
 
 procedure TFormChzzkWeb.ActionOpenChatExecute(Sender: TObject);
 begin
-  ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode('doc\채팅.html')),nil,nil,SW_SHOWNORMAL);
+  ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_chatonly)),nil,nil,SW_SHOWNORMAL);
+end;
+
+procedure TFormChzzkWeb.ActionOpenChatFullExecute(Sender: TObject);
+begin
+  ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_full)),nil,nil,SW_SHOWNORMAL);
 end;
 
 procedure TFormChzzkWeb.ActionDebugLogExecute(Sender: TObject);
@@ -551,7 +562,7 @@ end;
 
 procedure TFormChzzkWeb.ActionOpenNotifyExecute(Sender: TObject);
 begin
-  ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode('\doc\도네_구독_메시지.html')),nil,nil,SW_SHOWNORMAL);
+  ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_donation)),nil,nil,SW_SHOWNORMAL);
 end;
 
 procedure TFormChzzkWeb.ButtonRunClick(Sender: TObject);
@@ -689,6 +700,10 @@ begin
   WSPortSys:=XMLConfig1.GetValue('WS/PORTSYS','65003');
   IncludeChatTime:=XMLConfig1.GetValue('IncludeTime',False);
   ActionChatTime.Checked:=IncludeChatTime;
+
+  chatlog_full:=UTF8Encode(XMLConfig1.GetValue('CHAT/FULL',UTF8Decode(chatlog_full)));
+  chatlog_chatonly:=UTF8Encode(XMLConfig1.GetValue('CHAT/CHAT',UTF8Decode(chatlog_chatonly)));
+  chatlog_donation:=UTF8Encode(XMLConfig1.GetValue('CHAT/DONATION',UTF8Decode(chatlog_donation)));
 
   // start websocket server
   SockServerChat:=TSimpleWebsocketServer.Create(WSPortChat);
