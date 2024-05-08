@@ -50,12 +50,13 @@ chatsock1.onmessage = function (event) {
     div.append(chatline);
     if (div.children('div').length>itemmax) {
       div.children('div')[0].remove();
-    }    
-    var topoffset = div.offset().top;
+    }
+    // scroll
+    var topoffset = $(window).scrollTop();
     var height = div.height();
     var pageHeight = $(window).height();
-    if ((topoffset + height) > pageHeight) {
-      window.scrollTo(0, (topoffset+height) - pageHeight);
+    if (height > pageHeight) {
+      window.scrollTo(0, height - pageHeight);
     }
 }
 
@@ -72,11 +73,12 @@ chatsock2.onmessage = function (event) {
     if (div.children('div').length>itemmax) {
       div.children('div')[0].remove();
     }
-    var topoffset = div.offset().top;
+    // scroll
+    var topoffset = $(window).scrollTop();
     var height = div.height();
     var pageHeight = $(window).height();
-    if ((topoffset + height) > pageHeight) {
-      window.scrollTo(0, (topoffset+height) - pageHeight);
+    if (height > pageHeight) {
+      window.scrollTo(0, height - pageHeight);
     }
 }
 </script>
