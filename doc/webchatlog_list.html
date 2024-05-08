@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<title>채팅 통합 리스트</title>
+<link rel="stylesheet" href="./jquery/jquery-ui.css" />
+<link type="text/css" rel="stylesheet" href="main.17867962.css" />
+<script src = "./jquery/jquery-3.7.1.min.js"></script>
+<script src = "./jquery/jquery-ui.js"></script>
+<!-- link href="https://ssl.pstatic.net/static/nng/glive/resource/p/static/css/main.cb0f9f29.css" rel="stylesheet"-->
+<script>
+try {
+var chatsize = JSON.parse(localStorage.chatsize || "{}");
+} catch(e) {
+var chatsize = JSON.parse("{}");
+}
+var windowname='chatwindowchzzk';    // 단일 이름을 지정.
+$(document).ready(function(){
+  // load/save size
+  if(chatsize[windowname]) {
+    $("#wrapper").width(chatsize[windowname].width);
+    $("#wrapper").height(chatsize[windowname].height);
+  }
+  // make resizable
+  $("#wrapper").resizable({autoHide: true, stop: function (event, ui) {
+            chatsize[windowname] = ui.size;
+            localStorage.chatsize = JSON.stringify(chatsize);
+        }}); 
+});
+</script>
+</head> 
+<body>
+<div id="wrapper" >   
+    <div id="chatbox"></div>
+</div>
+<script type="text/javascript" src="reconnecting-websocket.min.js"></script>
+<script type="text/javascript">
+//
+var randomcolor=1;
+var itemmax=50;
+var chatsock = new ReconnectingWebSocket("ws://localhost:65002","chat");
+chatsock.reconnectInterval=2000;
+chatsock.onmessage = function (event) {
+    var div = $("#chatbox");
+    chatline=$(event.data);
+    // disable random color
+    //if(!randomcolor) {
+    //  chatline.find('.chat-author__display-name').attr('style','');
+    //}
+    div.append(chatline);
+    if (div.children('div').length>itemmax) {
+      div.children('div')[0].remove();
+    }    
+    var topoffset = div.offset().top;
+    var height = div.height();
+    var pageHeight = $(window).height();
+    if ((topoffset + height) > pageHeight) {
+      window.scrollTo(0, (topoffset+height) - pageHeight);
+    }
+}
+
+var chatsock = new ReconnectingWebSocket("ws://localhost:65003","chat");
+chatsock.reconnectInterval=2000;
+chatsock.onmessage = function (event) {
+    var div = $("#chatbox");
+    chatline=$(event.data);
+    // disable random color
+    //if(!randomcolor) {
+    //  chatline.find('.chat-author__display-name').attr('style','');
+    //}
+    div.append(chatline);
+    if (div.children('div').length>itemmax) {
+      div.children('div')[0].remove();
+    }
+    var topoffset = div.offset().top;
+    var height = div.height();
+    var pageHeight = $(window).height();
+    if ((topoffset + height) > pageHeight) {
+      window.scrollTo(0, (topoffset+height) - pageHeight);
+    }
+}
+</script>
+</body>
+</html>
