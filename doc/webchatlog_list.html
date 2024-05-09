@@ -35,28 +35,45 @@ $(document).ready(function(){
 </div>
 <script type="text/javascript" src="reconnecting-websocket.min.js"></script>
 <script type="text/javascript">
+var itemmax=200;
+var itemlimit=700;
+var doscroll=1;
 //
-var randomcolor=1;
-var itemmax=50;
+$(window).on('scroll', function(){
+  var curpos=$(window).scrollTop();
+  var height = $("#chatbox").height();
+  var pageHeight = $(window).height();
+  doscroll=1;
+  if (height > pageHeight) {
+      if (curpos + pageHeight >= height) {
+        doscroll=1;
+      } else {
+        doscroll=0;
+      }
+  }
+})
+
+//
 var chatsock1 = new ReconnectingWebSocket("ws://localhost:65002","chat");
 chatsock1.reconnectInterval=1000;
 chatsock1.onmessage = function (event) {
     var div = $("#chatbox");
     chatline=$(event.data);
-    // disable random color
-    //if(!randomcolor) {
-    //  chatline.find('.chat-author__display-name').attr('style','');
-    //}
     div.append(chatline);
-    if (div.children('div').length>itemmax) {
-      div.children('div')[0].remove();
-    }
-    // scroll
-    var topoffset = $(window).scrollTop();
-    var height = div.height();
-    var pageHeight = $(window).height();
-    if (height > pageHeight) {
-      window.scrollTo(0, height - pageHeight);
+    if (doscroll==1) {
+        if (div.children('div').length>itemmax) {
+          div.children('div')[0].remove();
+        }      
+        // scroll
+        var height = div.height();
+        var pageHeight = $(window).height();
+        if (height > pageHeight) {
+          window.scrollTo(0, height - pageHeight);
+        }
+    } else {
+        if (div.children('div').length>itemlimit) {
+          div.children('div')[0].remove();
+        }
     }
 }
 
@@ -65,20 +82,21 @@ chatsock2.reconnectInterval=1000;
 chatsock2.onmessage = function (event) {
     var div = $("#chatbox");
     chatline=$(event.data);
-    // disable random color
-    //if(!randomcolor) {
-    //  chatline.find('.chat-author__display-name').attr('style','');
-    //}
     div.append(chatline);
-    if (div.children('div').length>itemmax) {
-      div.children('div')[0].remove();
-    }
-    // scroll
-    var topoffset = $(window).scrollTop();
-    var height = div.height();
-    var pageHeight = $(window).height();
-    if (height > pageHeight) {
-      window.scrollTo(0, height - pageHeight);
+    if (doscroll==1) {
+        if (div.children('div').length>itemmax) {
+          div.children('div')[0].remove();
+        }      
+        // scroll
+        var height = div.height();
+        var pageHeight = $(window).height();
+        if (height > pageHeight) {
+          window.scrollTo(0, height - pageHeight);
+        }
+    } else {
+        if (div.children('div').length>itemlimit) {
+          div.children('div')[0].remove();
+        }
     }
 }
 </script>
