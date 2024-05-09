@@ -35,8 +35,23 @@ $(document).ready(function(){
 </div>
 <script type="text/javascript" src="reconnecting-websocket.min.js"></script>
 <script type="text/javascript">
+var itemmax=500;
+var itemlimit=700;
+var doscroll=1;
 //
-var randomcolor=1;
+$(window).on('scroll', function(){
+  var curpos=$(window).scrollTop();
+  var height = $("#chatbox").height();
+  var pageHeight = $(window).height();
+  doscroll=1;
+  if (height > pageHeight) {
+      if (curpos + pageHeight >= height) {
+        doscroll=1;
+      } else {
+        doscroll=0;
+      }
+  }
+})
 
 var chatsock = new ReconnectingWebSocket("ws://localhost:65003","chat");
 chatsock.reconnectInterval=2000;
@@ -44,12 +59,20 @@ chatsock.onmessage = function (event) {
     var div = $("#chatbox");
     chatline=$(event.data);
     div.append(chatline);
-    if (div.children('div').length>1000) {
-      div.children('div')[0].remove();
-    }
-    if (document.getElementById("chatbox").offsetHeight>document.documentElement.clientHeight) {
-      nstop=document.getElementById("chatbox").offsetHeight-document.documentElement.clientHeight;
-      $(document.documentElement).animate({scrollTop: nstop},"slow");
+    if (doscroll==1) {
+        if (div.children('div').length>itemmax) {
+          div.children('div')[0].remove();
+        }      
+        // scroll
+        var height = div.height();
+        var pageHeight = $(window).height();
+        if (height > pageHeight) {
+          window.scrollTo(0, height - pageHeight);
+        }
+    } else {
+        if (div.children('div').length>itemlimit) {
+          div.children('div')[0].remove();
+        }
     }
 }
 </script>
