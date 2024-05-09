@@ -110,7 +110,7 @@ implementation
 
 uses
   uCEFMiscFunctions, uCEFProcessMessage, uCEFDomVisitor, uCEFStringMap,
-  Windows, uWebsockSimple, uChecksumList, ShellApi, DateUtils;
+  Windows, uWebsockSimple, uChecksumList, ShellApi, DateUtils, StrUtils;
 
 
 {$R *.lfm}
@@ -169,7 +169,8 @@ begin
     end;
 end;
 
-function GetElementAttr(const Node: ICefDomNode):ustring;
+// it has bug
+{function GetElementAttr(const Node: ICefDomNode):ustring;
 var
   attr: ICefStringMap;
 begin
@@ -180,11 +181,29 @@ begin
   finally
     attr:=nil;
   end;
-end;
+end;}
 
 function CheckElementAttr(const str: ustring; const Node: ICefDomNode):Boolean;
+var
+  markup: ustring;
+  ia, ib, ic, id: Integer;
 begin
-  Result:=Pos(str,GetElementAttr(Node))<>0;
+  Result:=False;
+  markup:=Node.AsMarkup;
+  ia:=Pos('class',markup);
+  if ia>0 then
+    begin
+      ib:=PosEx('"',markup,ia);
+      if ib>0 then
+        begin
+          ic:=PosEx('"',markup,ib+1);
+          if ic>0 then
+            begin
+              id:=PosEx(str,markup,ib);
+              Result:=(id>0) and (id<ic);
+            end;
+        end;
+    end;
 end;
 
 function ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame):Boolean;
