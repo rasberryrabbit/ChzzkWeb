@@ -45,7 +45,7 @@ $(window).on('scroll', function(){
   var pageHeight = $(window).height();
   doscroll=1;
   if (height > pageHeight) {
-      if (curpos + pageHeight >= height) {
+      if (curpos + pageHeight + 30 >= height) {
         doscroll=1;
       } else {
         doscroll=0;
