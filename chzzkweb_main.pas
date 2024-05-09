@@ -351,7 +351,8 @@ begin
                                              nodeattr:=ChatCon.AsMarkup;
                                              if CheckElementAttr(hiddenchatclass,ChatCon) then
                                                begin
-                                                 CheckItem:=pPrev^.Checksum;
+                                                 if pPrev<>nil then
+                                                   CheckItem:=pPrev^.Checksum;
                                                  bHidden:=True;
                                                  //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<30> ');
                                                end;
