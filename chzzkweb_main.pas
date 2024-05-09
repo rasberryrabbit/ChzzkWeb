@@ -169,7 +169,6 @@ begin
     end;
 end;
 
-// it has bug
 {function GetElementAttr(const Node: ICefDomNode):ustring;
 var
   attr: ICefStringMap;
@@ -188,7 +187,7 @@ var
   markup: ustring;
   ia, ib, ic, id: Integer;
 begin
-  Result:=False;
+  {Result:=False;
   markup:=Node.AsMarkup;
   ia:=Pos('class',markup);
   if ia>0 then
@@ -203,7 +202,8 @@ begin
               Result:=(id>0) and (id<ic);
             end;
         end;
-    end;
+    end;}
+  Result:=Pos(str,Node.GetElementAttribute('class'))>0;
 end;
 
 function ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame):Boolean;
