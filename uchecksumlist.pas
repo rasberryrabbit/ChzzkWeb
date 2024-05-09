@@ -174,6 +174,7 @@ procedure TChecksumList.CopyData(from: TChecksumList);
 begin
   system.Move(from.FList[0],FList[0],sizeof(FList));
   Count:=from.Count;
+  DataIndex:=0;
 end;
 
 
