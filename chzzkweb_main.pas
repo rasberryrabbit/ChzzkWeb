@@ -8,8 +8,8 @@ uses
   Classes, SysUtils, XMLConf, Forms, Controls, Graphics, Dialogs, StdCtrls,
   uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants,
   uCEFInterfaces, uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages,
-  ExtCtrls, ActnList, Menus, uCEFWinControl, UniqueInstance, JvJanLED,
-  JvJanToggle, RxVersInfo;
+  ExtCtrls, ActnList, Menus, uCEFWinControl, UniqueInstance, JvXPButtons,
+  RxVersInfo;
 
 
 const
@@ -36,7 +36,7 @@ type
     CEFWindowParent1: TCEFWindowParent;
     Chromium1: TChromium;
     Editurl: TEdit;
-    JvJanToggle1: TJvJanToggle;
+    JvXPButton1: TJvXPButton;
     Label1: TLabel;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
@@ -91,6 +91,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure JvJanToggle1ToggleChange(Sender: Tobject; AState: boolean);
+    procedure JvXPButton1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
   private
@@ -739,6 +740,15 @@ procedure TFormChzzkWeb.JvJanToggle1ToggleChange(Sender: Tobject;
   AState: boolean);
 begin
   Timer2.Enabled:=AState;
+end;
+
+procedure TFormChzzkWeb.JvXPButton1Click(Sender: TObject);
+begin
+  Timer2.Enabled:=not Timer2.Enabled;
+  if Timer2.Enabled then
+    JvXPButton1.Caption:='실행 중'
+    else
+      JvXPButton1.Caption:='대기 중';
 end;
 
 procedure TFormChzzkWeb.Timer1Timer(Sender: TObject);

@@ -17,7 +17,7 @@ object FormChzzkWeb: TFormChzzkWeb
     Top = 88
     Width = 1010
     Anchors = [akTop, akLeft, akRight, akBottom]
-    TabOrder = 0
+    TabOrder = 1
   end
   object ButtonHome: TButton
     Left = 8
@@ -25,7 +25,7 @@ object FormChzzkWeb: TFormChzzkWeb
     Top = 48
     Width = 75
     Caption = '치지직 홈'
-    TabOrder = 1
+    TabOrder = 2
     OnClick = ButtonHomeClick
   end
   object Label1: TLabel
@@ -43,7 +43,7 @@ object FormChzzkWeb: TFormChzzkWeb
     Top = 50
     Width = 857
     Anchors = [akTop, akLeft, akRight]
-    TabOrder = 2
+    TabOrder = 3
     OnKeyPress = EditurlKeyPress
   end
   object ButtonGo: TButton
@@ -53,20 +53,15 @@ object FormChzzkWeb: TFormChzzkWeb
     Width = 56
     Anchors = [akTop, akRight]
     Caption = 'Go'
-    TabOrder = 3
+    TabOrder = 4
     OnClick = ButtonGoClick
   end
-  object JvJanToggle1: TJvJanToggle
-    Left = 16
-    Height = 29
-    Hint = 'ON / OFF'
-    Top = 8
-    Width = 58
-    ToggleState = True
-    ToggleStyle = tsHorizontal
-    InCap = 'O'
-    OutCap = 'X'
-    OnToggleChange = JvJanToggle1ToggleChange
+  object JvXPButton1: TJvXPButton
+    Left = 8
+    Top = 16
+    Caption = '실행 중'
+    TabOrder = 0
+    OnClick = JvXPButton1Click
   end
   object Chromium1: TChromium
     OnProcessMessageReceived = Chromium1ProcessMessageReceived

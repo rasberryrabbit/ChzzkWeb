@@ -29,6 +29,12 @@
     </RunParams>
     <RequiredPackages>
       <Item>
+        <PackageName Value="JvXPCtrlsLazR"/>
+      </Item>
+      <Item>
+        <PackageName Value="JvXPCtrlsLazD"/>
+      </Item>
+      <Item>
         <PackageName Value="JvJansLazR"/>
       </Item>
       <Item>
