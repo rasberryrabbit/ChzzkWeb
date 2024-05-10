@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, XMLConf, Forms, Controls, Graphics, Dialogs, StdCtrls,
   uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants,
   uCEFInterfaces, uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages,
-  ExtCtrls, ActnList, Menus, uCEFWinControl, UniqueInstance, RxVersInfo;
+  ExtCtrls, ActnList, Menus, uCEFWinControl, UniqueInstance, JvJanLED,
+  JvJanToggle, RxVersInfo;
 
 
 const
@@ -31,11 +32,11 @@ type
     ActionWSPort: TAction;
     ActionList1: TActionList;
     ButtonHome: TButton;
-    ButtonRun: TButton;
     ButtonGo: TButton;
     CEFWindowParent1: TCEFWindowParent;
     Chromium1: TChromium;
     Editurl: TEdit;
+    JvJanToggle1: TJvJanToggle;
     Label1: TLabel;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
@@ -89,6 +90,7 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure JvJanToggle1ToggleChange(Sender: Tobject; AState: boolean);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
   private
@@ -268,7 +270,6 @@ begin
               MakeCheck('',CheckItemLast);
               DupCount:=0;
               // chat log
-              // Don't use GetElementAttribute(), it makes random error.
               while ChatNode<>nil do
                 begin
                   nodeattr:=ChatNode.AsMarkup;
@@ -320,7 +321,6 @@ begin
                                  end;
                            end;
                          // compare checksum
-                         // Don't use GetElementAttribute(), it makes random error.
                          if bCompare then
                            begin
                              ChatComp:=ChatNode;
@@ -581,11 +581,7 @@ end;
 
 procedure TFormChzzkWeb.ButtonRunClick(Sender: TObject);
 begin
-  Timer2.Enabled:=not Timer2.Enabled;
-  if Timer2.Enabled then
-    ButtonRun.Caption:='실행 중'
-    else
-      ButtonRun.Caption:='대기 중';
+
 end;
 
 procedure TFormChzzkWeb.ButtonGoClick(Sender: TObject);
@@ -737,6 +733,12 @@ begin
   Caption:='ChzzkWeb '+RxVersionInfo1.FileVersion;
 
   if not(Chromium1.CreateBrowser(CEFWindowParent1, '')) then Timer1.Enabled := True;
+end;
+
+procedure TFormChzzkWeb.JvJanToggle1ToggleChange(Sender: Tobject;
+  AState: boolean);
+begin
+  Timer2.Enabled:=AState;
 end;
 
 procedure TFormChzzkWeb.Timer1Timer(Sender: TObject);
