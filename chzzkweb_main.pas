@@ -24,6 +24,7 @@ type
   { TFormChzzkWeb }
 
   TFormChzzkWeb = class(TForm)
+    ActionWSockUnique: TAction;
     ActionOpenChatFull: TAction;
     ActionChatTime: TAction;
     ActionDebugLog: TAction;
@@ -40,6 +41,7 @@ type
     Label1: TLabel;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
+    MenuItem10: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
@@ -58,6 +60,7 @@ type
     procedure ActionOpenChatExecute(Sender: TObject);
     procedure ActionOpenChatFullExecute(Sender: TObject);
     procedure ActionOpenNotifyExecute(Sender: TObject);
+    procedure ActionWSockUniqueExecute(Sender: TObject);
     procedure ActionWSPortExecute(Sender: TObject);
     procedure ButtonHomeClick(Sender: TObject);
     procedure ButtonRunClick(Sender: TObject);
@@ -90,7 +93,6 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure JvJanToggle1ToggleChange(Sender: Tobject; AState: boolean);
     procedure JvXPButton1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
@@ -101,6 +103,7 @@ type
     procedure CEFCreated(var Msg:TLMessage); message CEF_AFTERCREATED;
     procedure CEFDestroy(var Msg:TLMessage); message CEF_DESTROY;
   public
+    procedure SetFormCaption;
 
   end;
 
@@ -124,6 +127,7 @@ const
 var
   WSPortChat: string = '65002';
   WSPortSys: string = '65003';
+  WSPortUnique: Boolean = False;
   SockServerChat: TSimpleWebsocketServer;
   SockServerSys: TSimpleWebsocketServer;
   ProcessSysChat: Boolean = False;
@@ -549,6 +553,7 @@ begin
       SockServerSys:=TSimpleWebsocketServer.Create(WSPortSys);
       XMLConfig1.SetValue('WS/PORT',WSPortChat);
       XMLConfig1.SetValue('WS/PORTSYS',WSPortSys);
+      SetFormCaption;
     end;
 end;
 
@@ -578,6 +583,13 @@ end;
 procedure TFormChzzkWeb.ActionOpenNotifyExecute(Sender: TObject);
 begin
   ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_donation)),nil,nil,SW_SHOWNORMAL);
+end;
+
+procedure TFormChzzkWeb.ActionWSockUniqueExecute(Sender: TObject);
+begin
+  ActionWSockUnique.Checked:=not ActionWSockUnique.Checked;
+  WSPortUnique:=ActionWSockUnique.Checked;
+  XMLConfig1.SetValue('WS/UNIQUE',WSPortUnique);
 end;
 
 procedure TFormChzzkWeb.ButtonRunClick(Sender: TObject);
@@ -684,7 +696,10 @@ begin
         s:=message.ArgumentList.GetString(0);
         if IncludeChatTime then
           InsertTime(s);
-        SockServerSys.BroadcastMsg(UTF8Encode(s));
+        if not WSPortUnique then
+          SockServerSys.BroadcastMsg(UTF8Encode(s))
+          else
+            SockServerChat.BroadcastMsg(UTF8Encode(s));
         Result:=True;
       end;
 end;
@@ -701,13 +716,15 @@ end;
 procedure TFormChzzkWeb.FormClose(Sender: TObject; var CloseAction: TCloseAction
   );
 begin
-
 end;
 
 procedure TFormChzzkWeb.FormDestroy(Sender: TObject);
 begin
   SockServerChat.Free;
   SockServerSys.Free;
+  XMLConfig1.SetValue('CHAT/FULL',UTF8Decode(chatlog_full));
+  XMLConfig1.SetValue('CHAT/CHAT',UTF8Decode(chatlog_chatonly));
+  XMLConfig1.SetValue('CHAT/DONATION',UTF8Decode(chatlog_donation));
   if XMLConfig1.Modified then
     XMLConfig1.SaveToFile('config.xml');
 end;
@@ -718,10 +735,13 @@ begin
 
   if FileExists('config.xml') then
     XMLConfig1.LoadFromFile('config.xml');
+
+  IncludeChatTime:=XMLConfig1.GetValue('IncludeTime',False);
   WSPortChat:=XMLConfig1.GetValue('WS/PORT','65002');
   WSPortSys:=XMLConfig1.GetValue('WS/PORTSYS','65003');
-  IncludeChatTime:=XMLConfig1.GetValue('IncludeTime',False);
+  WSPortUnique:=XMLConfig1.GetValue('WS/UNIQUE',False);
   ActionChatTime.Checked:=IncludeChatTime;
+  ActionWSockUnique.Checked:=WSPortUnique;
 
   chatlog_full:=UTF8Encode(XMLConfig1.GetValue('CHAT/FULL',UTF8Decode(chatlog_full)));
   chatlog_chatonly:=UTF8Encode(XMLConfig1.GetValue('CHAT/CHAT',UTF8Decode(chatlog_chatonly)));
@@ -731,15 +751,9 @@ begin
   SockServerChat:=TSimpleWebsocketServer.Create(WSPortChat);
   SockServerSys:=TSimpleWebsocketServer.Create(WSPortSys);
 
-  Caption:='ChzzkWeb '+RxVersionInfo1.FileVersion;
+  SetFormCaption;
 
   if not(Chromium1.CreateBrowser(CEFWindowParent1, '')) then Timer1.Enabled := True;
-end;
-
-procedure TFormChzzkWeb.JvJanToggle1ToggleChange(Sender: Tobject;
-  AState: boolean);
-begin
-  Timer2.Enabled:=AState;
 end;
 
 procedure TFormChzzkWeb.JvXPButton1Click(Sender: TObject);
@@ -785,6 +799,13 @@ end;
 procedure TFormChzzkWeb.CEFDestroy(var Msg: TLMessage);
 begin
   CEFWindowParent1.Free;
+  if XMLConfig1.Modified then
+    XMLConfig1.SaveToFile('config.xml');
+end;
+
+procedure TFormChzzkWeb.SetFormCaption;
+begin
+  Caption:='ChzzkWeb '+RxVersionInfo1.FileVersion+' @'+WSPortChat;
 end;
 
 
