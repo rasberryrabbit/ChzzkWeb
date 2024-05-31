@@ -804,8 +804,11 @@ begin
 end;
 
 procedure TFormChzzkWeb.SetFormCaption;
+var
+  cefVer: Cardinal;
 begin
-  Caption:='ChzzkWeb '+RxVersionInfo1.FileVersion+' @'+WSPortChat;
+  cefVer:=GetFileVersion('libcef');
+  Caption:='ChzzkWeb '+RxVersionInfo1.FileVersion+' '+IntToHex(cefVer,8)+' @'+WSPortChat;
 end;
 
 
