@@ -696,10 +696,9 @@ begin
         s:=message.ArgumentList.GetString(0);
         if IncludeChatTime then
           InsertTime(s);
-        if not WSPortUnique then
-          SockServerSys.BroadcastMsg(UTF8Encode(s))
-          else
-            SockServerChat.BroadcastMsg(UTF8Encode(s));
+        SockServerSys.BroadcastMsg(UTF8Encode(s));
+        if WSPortUnique then
+          SockServerChat.BroadcastMsg(UTF8Encode(s));
         Result:=True;
       end;
 end;
