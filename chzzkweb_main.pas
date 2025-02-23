@@ -116,7 +116,8 @@ implementation
 
 uses
   uCEFMiscFunctions, uCEFProcessMessage, uCEFDomVisitor, uCEFStringMap,
-  Windows, uWebsockSimple, uChecksumList, ShellApi, DateUtils, StrUtils;
+  Windows, uWebsockSimple, uChecksumList, ShellApi, DateUtils, StrUtils,
+  regexpr;
 
 
 {$R *.lfm}
@@ -138,6 +139,8 @@ var
   chatlog_full: string = 'doc\webchatlog_list.html';
   chatlog_donation: string = '\doc\도네_구독_메시지.html';
   chatlog_chatonly: string = 'doc\채팅.html';
+  stripusertooltip: TRegExpr;
+
 
 
 function GetChatMarkup(Node: ICefDomNode):ustring;
@@ -715,6 +718,7 @@ end;
 procedure TFormChzzkWeb.FormClose(Sender: TObject; var CloseAction: TCloseAction
   );
 begin
+  stripusertooltip.Free;
 end;
 
 procedure TFormChzzkWeb.FormDestroy(Sender: TObject);
@@ -730,6 +734,7 @@ end;
 
 procedure TFormChzzkWeb.FormShow(Sender: TObject);
 begin
+  stripusertooltip:=TRegExpr.Create('\<span\sclass\="badge_tooltip.+\/span\>');
   MakeCheck(strhidden,CheckHidden);
 
   if FileExists('config.xml') then
@@ -823,6 +828,7 @@ begin
   GlobalCEFApp.EnablePrintPreview  := False;
   GlobalCEFApp.EnableGPU           := True;
   GlobalCEFApp.SetCurrentDir       := True;
+  GlobalCEFApp.CheckCEFFiles       := False;
   //GlobalCEFApp.SingleProcess       := True;
 end;
 

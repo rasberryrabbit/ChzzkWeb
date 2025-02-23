@@ -7,7 +7,7 @@ object FormChzzkWeb: TFormChzzkWeb
   ClientHeight = 618
   ClientWidth = 1027
   Menu = MainMenu1
-  LCLVersion = '3.99.0.0'
+  LCLVersion = '4.99.0.0'
   OnClose = FormClose
   OnDestroy = FormDestroy
   OnShow = FormShow

@@ -13,8 +13,9 @@
     </General>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
+      <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
-      <RevisionNr Value="13"/>
+      <RevisionNr Value="14"/>
       <BuildNr Value="2"/>
     </VersionInfo>
     <BuildModes>
@@ -96,8 +97,8 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <Libraries Value="C:\development\extras\mormot\packages\lazarus\lib\i386-win32\;C:\development\extras\mormot\static\i386-win32\"/>
-      <OtherUnitFiles Value="C:\development\extras\mormot\packages\lazarus\lib\i386-win32\;C:\development\extras\mormot\src\net\;C:\development\extras\mormot\src\crypt\;C:\development\extras\mormot\src\core\"/>
+      <Libraries Value="C:\fpcupdeluxe\extras\mormot\packages\lazarus\lib\i386-win32\;C:\fpcupdeluxe\extras\mormot\static\i386-win32\"/>
+      <OtherUnitFiles Value="C:\fpcupdeluxe\extras\mormot\packages\lazarus\lib\i386-win32\;C:\fpcupdeluxe\extras\mormot\src\net\;C:\fpcupdeluxe\extras\mormot\src\crypt\;C:\fpcupdeluxe\extras\mormot\src\core\"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>

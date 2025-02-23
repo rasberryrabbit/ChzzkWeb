@@ -17,7 +17,7 @@ uses
 
 {$R *.res}
 
-//{$SetPEFlags IMAGE_FILE_LARGE_ADDRESS_AWARE}
+{$SetPEFlags IMAGE_FILE_LARGE_ADDRESS_AWARE}
 
 begin
   CreateGlobalCEFApp;
