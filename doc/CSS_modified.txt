@@ -1,0 +1,12 @@
+/* Enhance text */
+.live_chatting_message_chatting_message__7TKns {background:#333333cf;border-radius: 6px; text-shadow: -1px -1px 0 #333333, 1px -1px 0 #333333,-1px 1px 0 #333333,1px 1px 0 #333333;}
+.name_ellipsis__Hu9B\+{display:-ms-inline-flexbox;display:flex;max-width:100%;overflow:hidden;vertical-align:top}
+.name_text__yQG50 {text-shadow: -1px -1px 0 #333333, 1px -1px 0 #333333,-1px 1px 0 #333333,1px 1px 0 #333333;}
+.live_chatting_guide_container__vr6hZ {display: none}
+
+/* Remove badge icons */
+.live_chatting_message_container__vrI-y:not(.live_chatting_message_is_overlay__cALCf) .live_chatting_message_nickname__UdLXa {
+    max-width: 100%;
+    display: none;
+}
+

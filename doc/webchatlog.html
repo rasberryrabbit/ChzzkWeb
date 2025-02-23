@@ -4,7 +4,7 @@
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 <title>Chat - Customer Module</title>
 <link rel="stylesheet" href="./jquery/jquery-ui.css" />
-<link type="text/css" rel="stylesheet" href="main.17867962.css" />
+<link type="text/css" rel="stylesheet" href="main.56f98435-dark.css" />
 <script src = "./jquery/jquery-3.7.1.min.js"></script>
 <script src = "./jquery/jquery-ui.min.js"></script>
 <!-- link href="https://ssl.pstatic.net/static/nng/glive/resource/p/static/css/main.cb0f9f29.css" rel="stylesheet"-->
@@ -13,8 +13,8 @@ var chatsize = JSON.parse(sessionStorage.chatsize || "{}");
 $(document).ready(function(){
   // load/save size
   if(chatsize.wrapper) {
-    $("#wrapper").width(chatsize.wrapper.width);
-    $("#wrapper").height(chatsize.wrapper.height);
+    //$("#wrapper").width(chatsize.wrapper.width);
+    //$("#wrapper").height(chatsize.wrapper.height);
   }
   // make resizable
   $("#wrapper").resizable({autoHide: true, stop: function (event, ui) {
@@ -45,34 +45,14 @@ chatsock.onmessage = function (event) {
     if (div.children('div').length>10) {
       div.children('div')[0].remove();
     }
-    $('#chatbox').animate({scrollTop: document.body.scrollHeight},"slow");
-    // disappear 
     var le=document.querySelector('#chatbox').lastChild;
+    le.scrollIntoView();
+    // disappear     
     setTimeout(function () {
           le.style.display='none';    
     }, 30000);
 }
 
-var chatsock = new ReconnectingWebSocket("ws://localhost:65003","chat");
-chatsock.reconnectInterval=2000;
-chatsock.onmessage = function (event) {
-    var div = $("#chatbox");
-    chatline=$(event.data);
-    // disable random color
-    //if(!randomcolor) {
-    //  chatline.find('.chat-author__display-name').attr('style','');
-    //}
-    div.append(chatline);
-    if (div.children('div').length>10) {
-      div.children('div')[0].remove();
-    }
-    $('#chatbox').animate({scrollTop: document.body.scrollHeight},"slow");
-    // disappear 
-    var le=document.querySelector('#chatbox').lastChild;
-    setTimeout(function () {
-          le.style.display='none';    
-    }, 30000);
-}    
 </script>
 </body>
 </html>

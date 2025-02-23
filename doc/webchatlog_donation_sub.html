@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-<title>채팅 통합 리스트</title>
+<title>도네이션, 구독</title>
 <link rel="stylesheet" href="./jquery/jquery-ui.css" />
 <link type="text/css" rel="stylesheet" href="main.56f98435-dark.css" />
 <script src = "./jquery/jquery-3.7.1.min.js"></script>
@@ -35,7 +35,7 @@ $(document).ready(function(){
 </div>
 <script type="text/javascript" src="reconnecting-websocket.min.js"></script>
 <script type="text/javascript">
-var itemmax=200;
+var itemmax=500;
 var itemlimit=700;
 var doscroll=1;
 //
@@ -53,10 +53,9 @@ $(window).on('scroll', function(){
   }
 })
 
-//
-var chatsock1 = new ReconnectingWebSocket("ws://localhost:65002","chat");
-chatsock1.reconnectInterval=1000;
-chatsock1.onmessage = function (event) {
+var chatsock = new ReconnectingWebSocket("ws://localhost:65003","chat");
+chatsock.reconnectInterval=2000;
+chatsock.onmessage = function (event) {
     var div = $("#chatbox");
     chatline=$(event.data);
     div.append(chatline);
@@ -76,30 +75,6 @@ chatsock1.onmessage = function (event) {
         }
     }
 }
-
-var chatsock1 = new ReconnectingWebSocket("ws://localhost:65003","chat");
-chatsock1.reconnectInterval=1000;
-chatsock1.onmessage = function (event) {
-    var div = $("#chatbox");
-    chatline=$(event.data);
-    div.append(chatline);
-    if (doscroll==1) {
-        if (div.children('div').length>itemmax) {
-          div.children('div')[0].remove();
-        }      
-        // scroll
-        var height = div.height();
-        var pageHeight = $(window).height();
-        if (height > pageHeight) {
-          window.scrollTo(0, height - pageHeight);
-        }
-    } else {
-        if (div.children('div').length>itemlimit) {
-          div.children('div')[0].remove();
-        }
-    }
-}
-
 </script>
 </body>
 </html>

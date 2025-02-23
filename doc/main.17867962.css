@@ -6086,7 +6086,7 @@ input {
 }
 .name_ellipsis__Hu9B\+ {
   display:-ms-inline-flexbox;
-  display:inline-flex;
+  display:flex;
   max-width:100%;
   overflow:hidden;
   vertical-align:top
@@ -6094,7 +6094,7 @@ input {
 .name_ellipsis__Hu9B\+ .name_text__yQG50 {
   overflow:hidden;
   text-overflow:ellipsis;
-  white-space:nowrap
+  white-space:nowrap;
 }
 .name_ellipsis__Hu9B\+ .name_icon__zdbVH {
   -ms-flex:none;
@@ -6125,7 +6125,7 @@ input {
 }
 .live_chatting_username_container__m1-i5:not(.live_chatting_username_is_overlay__A8Xmr):not(.live_chatting_username_is_donation__eXMYs):not(.live_chatting_username_donation_alarm__xEM44):not(.live_chatting_username_is_subscription__G\+gtA).live_chatting_username_is_message__jvTvP {
   line-height:18px;
-  margin:-2px 0;
+  margin:2px 0;
   padding:2px 4px 2px 2px;
   position:relative
 }
@@ -12010,6 +12010,11 @@ a.news_profile__73Esm {
 .live_chatting_popup_profile_link__MwN4n svg {
   margin-top:1px
 }
+
+.live_chatting_message_container__vrI-y {
+  padding: 2px;
+}    
+
 .live_chatting_message_container__vrI-y .live_chatting_message_emoji__1V1bl {
   font-size:22px
 }
@@ -12030,11 +12035,13 @@ a.news_profile__73Esm {
   opacity:.3
 }
 .live_chatting_message_container__vrI-y:not(.live_chatting_message_is_overlay__cALCf) .live_chatting_message_wrapper__xpYre {
-  line-height:20px
+  line-height:20px;
+  display: flex
 }
 .live_chatting_message_container__vrI-y:not(.live_chatting_message_is_overlay__cALCf) button.live_chatting_message_wrapper__xpYre {
   padding:4px 8px 4px 6px;
-  text-align:left
+  text-align:left;
+  display: flex
 }
 .live_chatting_message_container__vrI-y:not(.live_chatting_message_is_overlay__cALCf) button.live_chatting_message_wrapper__xpYre:active,
 .live_chatting_message_container__vrI-y:not(.live_chatting_message_is_overlay__cALCf) button.live_chatting_message_wrapper__xpYre:focus-visible,
@@ -30475,4 +30482,299 @@ a.twitchzzk_footer_item__CRJWN:hover {
   margin:50px auto 0;
   max-width:2060px;
   width:100%
+}
+
+.live_chatting_subscription_viewer_gift_message_container__BNe6X {
+    border-radius: 10px;
+    margin_top: 10px;
+    position: relative;
+    padding: 10px;
+    background-color: #3e34af;
+}
+
+.live_chatting_subscription_channel_gift_message_container__v4WvS {
+    word-wrap: break-word;
+    background-color: #3e34af;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding: 10px 13px;
+    position: relative;
+    word-break: break-all;
+}
+
+.live_chatting_subscription_channel_gift_message_container__v4WvS {
+  display:-ms-flexbox;
+  display:flex;
+  overflow:hidden    
+}
+
+.live_chatting_popup_gift_container__H6sxN {
+  word-wrap:break-word;
+  bottom:calc(100% - 3px);
+  left:20px;
+  letter-spacing:-.3px;
+  line-height:18px;
+  position:absolute;
+  right:20px;
+  text-align:center;
+  word-break:break-all;
+  z-index:10
+}
+
+.live_chatting_username_container__m1-i5.live_chatting_username_is_mission__TVMIj .live_chatting_username_nickname__dDbbj{
+color:inherit!important;font-family:Sandoll Nemony2,Apple SD Gothic NEO,Helvetica Neue,Helvetica,나눔고딕,NanumGothic,Malgun Gothic,맑은 고딕,굴림,gulim,새굴림,noto sans,돋움,Dotum,sans-serif;font-weight:400;vertical-align:top}
+
+.live_chatting_mission_message_container__05yWF{
+position:relative}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_message__nAFAr{
+background-color:#212325;background-image:-webkit-gradient(linear,left bottom,left top,from(hsla(0,0%,100%,0)),to(hsla(0,0%,100%,.1)));background-image:linear-gradient(0deg,hsla(0,0%,100%,0),hsla(0,0%,100%,.1));border-radius:8px}
+.theme_dark .live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_message__nAFAr{
+-webkit-box-shadow:0 6px 10px rgba(0,0,0,.5),inset 1px 1px 1px hsla(0,0%,100%,.1);box-shadow:0 6px 10px rgba(0,0,0,.5),inset 1px 1px 1px hsla(0,0%,100%,.1)}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_message__nAFAr .live_chatting_mission_message_wrapper__7A6\+f{
+overflow:visible;padding:8px 10px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_message__nAFAr .live_chatting_mission_message_mark__5kPFD{
+background-color:#00ffa3;border-radius:4px;color:#000;font-size:11px;height:18px;padding:0 5px 0 3px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_message__nAFAr .live_chatting_mission_message_username__s2Icl{
+color:rgba(201,206,220,.8);font-size:13px;line-height:16px;margin-left:5px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_message__nAFAr .live_chatting_mission_message_text_container__pj6Kx{
+color:#fff;line-height:20px;margin-top:8px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_message__nAFAr .live_chatting_mission_message_information__JSKKQ{
+margin-top:12px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_message__nAFAr .live_chatting_mission_message_money__WdraO{
+color:#dfe2ea;font-size:13px;line-height:15px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_message__nAFAr .live_chatting_mission_message_time__ojxnY{
+border:1px solid rgba(255,255,255,.2);border-radius:14px;color:#fff;height:27px;padding:0 8px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_message__nAFAr .live_chatting_mission_message_time__ojxnY svg{
+margin-right:4px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz{
+border-radius:20px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz.live_chatting_mission_message_pending__Efx7M .live_chatting_mission_message_mark__5kPFD{
+background-color:#4d4d4d;color:#fff}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz.live_chatting_mission_message_countdown__Tq\+cl .live_chatting_mission_message_time__ojxnY{
+background-color:#e02020}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz.live_chatting_mission_message_waiting_confirm__qwTIJ .live_chatting_mission_message_gauge__I40ll{
+background-color:rgba(224,32,32,.2)}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz.live_chatting_mission_message_waiting_confirm__qwTIJ .live_chatting_mission_message_time__ojxnY{
+background-color:#e02020}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz.live_chatting_mission_message_succeed__9OV3j{
+background-color:#00ffa3;background-image:-webkit-gradient(linear,left top,left bottom,from(rgba(0,0,0,.4)),to(rgba(0,0,0,.4)));background-image:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4))}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz.live_chatting_mission_message_succeed__9OV3j .live_chatting_mission_message_mark__5kPFD,.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz.live_chatting_mission_message_succeed__9OV3j .live_chatting_mission_message_result__b1juO{
+background-color:#fff;color:#000}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz.live_chatting_mission_message_fail__k68NM{
+background-color:#141517}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz.live_chatting_mission_message_fail__k68NM .live_chatting_mission_message_mark__5kPFD,.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz.live_chatting_mission_message_fail__k68NM .live_chatting_mission_message_result__b1juO{
+background-color:#4d4d4d;color:#fff}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_wrapper__7A6\+f{
+padding:16px 20px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_wrapper__7A6\+f:before{
+border-color:transparent}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_gauge__I40ll{
+background-color:hsla(0,0%,100%,.08)}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_mark__5kPFD{
+background-color:#00ffa3;border-radius:5px;color:#000;font-size:13px;height:22px;padding:0 5px 0 4px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_username__s2Icl{
+color:#dfe2ea;font-size:21px;line-height:22px;margin-left:8px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_text_container__pj6Kx{
+color:#fff;font-size:25px;line-height:32px;margin-top:16px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_information__JSKKQ{
+margin-top:14px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_money__WdraO{
+color:#dfe2ea;font-size:26px;line-height:30px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_time__ojxnY{
+background-color:#000;border-radius:21px;color:#fff;font-size:24px;height:42px;padding:0 15px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_time__ojxnY svg{
+margin-right:6px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_overlay__bzuSz .live_chatting_mission_message_result__b1juO{
+border-radius:21px;font-size:20px;height:42px;padding:0 15px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_fixed__STwnu{
+background-color:#1d1f22;border-radius:0 0 8px 8px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_fixed__STwnu .live_chatting_mission_message_wrapper__7A6\+f:before{
+content:none}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_channel__Wr9uX{
+background-color:rgba(46,48,51,.3);background-image:-webkit-gradient(linear,left top,left bottom,from(rgba(0,0,0,.02)),to(rgba(0,0,0,.02)));background-image:linear-gradient(rgba(0,0,0,.02),rgba(0,0,0,.02));border-radius:8px}
+.theme_dark .live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_channel__Wr9uX{
+background-image:none}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_active_mission__hwMM1{
+background-color:#24272b;border-radius:8px}
+.live_chatting_mission_message_container__05yWF.live_chatting_mission_message_is_active_mission__hwMM1 .live_chatting_mission_message_wrapper__7A6\+f:before{
+content:none}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_countdown__Tq\+cl .live_chatting_mission_message_time__ojxnY{
+background-color:#e02020}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_waiting_confirm__qwTIJ .live_chatting_mission_message_gauge__I40ll{
+background-color:rgba(224,32,32,.15)}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_waiting_confirm__qwTIJ .live_chatting_mission_message_time__ojxnY{
+background-color:#e02020}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_succeed__9OV3j{
+background-color:#00ffa3;background-image:-webkit-gradient(linear,left top,left bottom,from(rgba(0,0,0,.1)),to(rgba(0,0,0,.1)));background-image:linear-gradient(rgba(0,0,0,.1),rgba(0,0,0,.1))}
+.theme_dark .live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_succeed__9OV3j{
+background-image:-webkit-gradient(linear,left top,left bottom,from(rgba(20,21,23,.4)),to(rgba(20,21,23,.4)));background-image:linear-gradient(rgba(20,21,23,.4),rgba(20,21,23,.4))}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_succeed__9OV3j .live_chatting_mission_message_username__s2Icl{
+color:#c9cedc}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_succeed__9OV3j .live_chatting_mission_message_result__b1juO{
+background-color:#fff;color:#000}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_succeed__9OV3j .live_chatting_mission_message_money__WdraO,.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_succeed__9OV3j .live_chatting_mission_message_text_container__pj6Kx{
+color:#fff}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_cheer_money__K7J3j .live_chatting_mission_message_result__b1juO,.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz).live_chatting_mission_message_fail__k68NM .live_chatting_mission_message_result__b1juO{
+background-color:#4d4d4d;color:#fff}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_wrapper__7A6\+f{
+padding:10px}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_gauge__I40ll{
+background-color:rgba(255,255,255,.04)}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_header__lNJ\+R,.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_information__JSKKQ{
+padding-left:5px}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_username__s2Icl{
+color:#c9cedc;font-size:13px;line-height:16px}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_time__ojxnY{
+background-color:#141517;border-radius:13px;color:#fff;height:25px;padding:0 8px}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_time__ojxnY svg{
+margin-right:4px}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_result__b1juO{
+border-radius:13px;font-size:12px;height:25px;padding:0 12px}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_text_container__pj6Kx{
+color:#fff;line-height:20px;margin:3px 5px 0}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_information__JSKKQ{
+margin-top:10px}
+.live_chatting_mission_message_container__05yWF:not(.live_chatting_mission_message_is_message__nAFAr,.live_chatting_mission_message_is_overlay__bzuSz) .live_chatting_mission_message_money__WdraO{
+color:#141517;line-height:18px}
+.live_chatting_mission_message_wrapper__7A6\+f{
+border-radius:inherit;overflow:hidden;position:relative}
+.live_chatting_mission_message_wrapper__7A6\+f:before{
+border:1px solid rgba(0,0,0,.1);border-radius:inherit;bottom:0;content:"";left:0;position:absolute;right:0;top:0}
+.live_chatting_mission_message_wrapper__7A6\+f:has(.live_chatting_mission_message_count__FRPu7)+.live_chatting_mission_message_tooltip__5nUjB{
+display:block}
+.live_chatting_mission_message_gauge__I40ll{
+bottom:0;left:0;position:absolute;top:0}
+.live_chatting_mission_message_header__lNJ\+R{
+display:-ms-flexbox;display:flex;gap:0 14px;position:relative}
+.live_chatting_mission_message_inner__ctxgg{
+-ms-flex-align:center;align-items:center;display:-ms-flexbox;display:flex;margin-top:3px;overflow:hidden}
+.live_chatting_mission_message_mark__5kPFD{
+-ms-flex-align:center;align-items:center;display:-ms-flexbox;display:flex;-ms-flex:none;flex:none;font-family:Sandoll Nemony2,Apple SD Gothic NEO,Helvetica Neue,Helvetica,나눔고딕,NanumGothic,Malgun Gothic,맑은 고딕,굴림,gulim,새굴림,noto sans,돋움,Dotum,sans-serif}
+.live_chatting_mission_message_mark__5kPFD svg{
+margin-right:1px}
+.live_chatting_mission_message_username__s2Icl{
+min-width:0}
+.live_chatting_mission_message_profile_button__viWfv{
+color:inherit;font-size:inherit;line-height:inherit;width:100%}
+.live_chatting_mission_message_is_me__IbbrG{
+background-color:rgba(0,255,163,.7);border-radius:4px;color:#000;-ms-flex:none;flex:none;font-family:Sandoll Nemony2,Apple SD Gothic NEO,Helvetica Neue,Helvetica,나눔고딕,NanumGothic,Malgun Gothic,맑은 고딕,굴림,gulim,새굴림,noto sans,돋움,Dotum,sans-serif;font-size:10px;height:16px;line-height:16px;margin-left:4px;text-align:center;width:16px}
+.live_chatting_mission_message_count__FRPu7{
+-ms-flex-align:center;-ms-flex-pack:center;align-items:center;background-color:rgba(64,64,64,.5);border-radius:4px;color:#fff;cursor:pointer;display:-ms-flexbox;display:flex;font-size:11px;font-weight:800;height:18px;justify-content:center;margin:0 2px 0 4px;padding:0 6px}
+.theme_dark .live_chatting_mission_message_count__FRPu7{
+background-color:rgba(var(--color-bg-01-rgb),.3);color:var(--color-content-03)}
+.live_chatting_mission_message_icon_person__fKZov{
+-ms-flex:none;flex:none;margin-right:4px}
+.live_chatting_mission_message_text_container__pj6Kx{
+font-family:Sandoll Nemony2,Apple SD Gothic NEO,Helvetica Neue,Helvetica,나눔고딕,NanumGothic,Malgun Gothic,맑은 고딕,굴림,gulim,새굴림,noto sans,돋움,Dotum,sans-serif;overflow:hidden;position:relative;white-space:nowrap}
+.live_chatting_mission_message_text_container__pj6Kx.live_chatting_mission_message_scroll_text__BYsb1{
+display:-ms-flexbox;display:flex}
+.live_chatting_mission_message_text_container__pj6Kx.live_chatting_mission_message_scroll_text__BYsb1 .live_chatting_mission_message_text_area__dEHCM{
+-webkit-animation:live_chatting_mission_message_scroll-text__rFHc5 10s linear infinite;animation:live_chatting_mission_message_scroll-text__rFHc5 10s linear infinite;display:-ms-flexbox;display:flex;-ms-flex:1 1;flex:1 1}
+.live_chatting_mission_message_text_container__pj6Kx.live_chatting_mission_message_scroll_text__BYsb1 .live_chatting_mission_message_text__z3o2M{
+-ms-flex:none;flex:none;margin-right:50px}
+.live_chatting_mission_message_information__JSKKQ{
+display:-ms-flexbox;display:flex;position:relative}
+.live_chatting_mission_message_money__WdraO{
+-ms-flex-align:center;-webkit-font-feature-settings:"tnum";font-feature-settings:"tnum";align-items:center;display:-ms-flexbox;display:flex;-ms-flex:none;flex:none;font-variant-numeric:tabular-nums;font-weight:800;padding:5px 0 7px}
+.live_chatting_mission_message_money__WdraO>svg{
+-ms-flex:none;flex:none;margin-right:4px}
+.live_chatting_mission_message_plus_button__9cfAe{
+color:var(--color-content-chzzk-01);font-family:Sandoll Nemony2,Apple SD Gothic NEO,Helvetica Neue,Helvetica,나눔고딕,NanumGothic,Malgun Gothic,맑은 고딕,굴림,gulim,새굴림,noto sans,돋움,Dotum,sans-serif;font-size:12px;line-height:18px;overflow:hidden;padding:5px 6px 7px;text-overflow:ellipsis;white-space:nowrap}
+.live_chatting_mission_message_icon_plus__CnhxG{
+margin:1px 3px 1px 0}
+.live_chatting_mission_message_time__ojxnY{
+-ms-flex-align:center;align-items:center;display:-ms-flexbox;display:flex;-ms-flex:none;flex:none;font-weight:800;margin-left:auto;overflow:hidden}
+.live_chatting_mission_message_countdown__Tq\+cl .live_chatting_mission_message_time__ojxnY{
+-webkit-animation:live_chatting_mission_message_timer-shaking__szzts 2s ease-in-out infinite;animation:live_chatting_mission_message_timer-shaking__szzts 2s ease-in-out infinite}
+.live_chatting_mission_message_waiting_confirm__qwTIJ .live_chatting_mission_message_time__ojxnY{
+-webkit-animation:live_chatting_mission_message_timer-shaking-1s__-ltie 1s ease-in-out infinite;animation:live_chatting_mission_message_timer-shaking-1s__-ltie 1s ease-in-out infinite}
+.live_chatting_mission_message_time__ojxnY svg{
+-ms-flex:none;flex:none}
+.live_chatting_mission_message_result__b1juO{
+-ms-flex-align:center;-ms-flex-pack:center;align-items:center;display:-ms-flexbox;display:flex;-ms-flex:none;flex:none;font-family:Sandoll Nemony2,Apple SD Gothic NEO,Helvetica Neue,Helvetica,나눔고딕,NanumGothic,Malgun Gothic,맑은 고딕,굴림,gulim,새굴림,noto sans,돋움,Dotum,sans-serif;justify-content:center;margin-left:auto}
+.live_chatting_mission_message_control__3\+CAQ{
+display:-ms-flexbox;display:flex;-ms-flex:none;flex:none;margin-left:auto}
+.live_chatting_mission_message_button__ujgSy{
+-ms-flex:none;flex:none;position:relative}
+.live_chatting_mission_message_button__ujgSy+.live_chatting_mission_message_button__ujgSy{
+margin-left:8px}
+.live_chatting_mission_message_button__ujgSy .live_chatting_mission_message_cheering_button__CY34g{
+padding:0 12px}
+.live_chatting_mission_message_tooltip__5nUjB{
+display:none;left:15px;position:absolute;top:42px;z-index:1}
+@-webkit-keyframes live_chatting_mission_message_scroll-text__rFHc5{
+0%{
+-webkit-transform:translateX(0);transform:translateX(0)}
+to{
+-webkit-transform:translateX(-100%);transform:translateX(-100%)}
+}
+@keyframes live_chatting_mission_message_scroll-text__rFHc5{
+0%{
+-webkit-transform:translateX(0);transform:translateX(0)}
+to{
+-webkit-transform:translateX(-100%);transform:translateX(-100%)}
+}
+@-webkit-keyframes live_chatting_mission_message_timer-shaking__szzts{
+0%{
+-webkit-transform:translateX(0);transform:translateX(0)}
+5%{
+-webkit-transform:translateX(-6px);transform:translateX(-6px)}
+10%{
+-webkit-transform:translateX(6px);transform:translateX(6px)}
+15%{
+-webkit-transform:translateX(-3px);transform:translateX(-3px)}
+20%{
+-webkit-transform:translateX(3px);transform:translateX(3px)}
+25%{
+-webkit-transform:translateX(0);transform:translateX(0)}
+to{
+-webkit-transform:translateX(0);transform:translateX(0)}
+}
+@keyframes live_chatting_mission_message_timer-shaking__szzts{
+0%{
+-webkit-transform:translateX(0);transform:translateX(0)}
+5%{
+-webkit-transform:translateX(-6px);transform:translateX(-6px)}
+10%{
+-webkit-transform:translateX(6px);transform:translateX(6px)}
+15%{
+-webkit-transform:translateX(-3px);transform:translateX(-3px)}
+20%{
+-webkit-transform:translateX(3px);transform:translateX(3px)}
+25%{
+-webkit-transform:translateX(0);transform:translateX(0)}
+to{
+-webkit-transform:translateX(0);transform:translateX(0)}
+}
+@-webkit-keyframes live_chatting_mission_message_timer-shaking-1s__-ltie{
+0%{
+-webkit-transform:translateX(0);transform:translateX(0)}
+10%{
+-webkit-transform:translateX(-6px);transform:translateX(-6px)}
+20%{
+-webkit-transform:translateX(6px);transform:translateX(6px)}
+30%{
+-webkit-transform:translateX(-3px);transform:translateX(-3px)}
+40%{
+-webkit-transform:translateX(3px);transform:translateX(3px)}
+50%{
+-webkit-transform:translateX(0);transform:translateX(0)}
+to{
+-webkit-transform:translateX(0);transform:translateX(0)}
+}
+@keyframes live_chatting_mission_message_timer-shaking-1s__-ltie{
+0%{
+-webkit-transform:translateX(0);transform:translateX(0)}
+10%{
+-webkit-transform:translateX(-6px);transform:translateX(-6px)}
+20%{
+-webkit-transform:translateX(6px);transform:translateX(6px)}
+30%{
+-webkit-transform:translateX(-3px);transform:translateX(-3px)}
+40%{
+-webkit-transform:translateX(3px);transform:translateX(3px)}
+50%{
+-webkit-transform:translateX(0);transform:translateX(0)}
+to{
+-webkit-transform:translateX(0);transform:translateX(0)}
 }

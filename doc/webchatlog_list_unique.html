@@ -77,29 +77,6 @@ chatsock1.onmessage = function (event) {
     }
 }
 
-var chatsock1 = new ReconnectingWebSocket("ws://localhost:65003","chat");
-chatsock1.reconnectInterval=1000;
-chatsock1.onmessage = function (event) {
-    var div = $("#chatbox");
-    chatline=$(event.data);
-    div.append(chatline);
-    if (doscroll==1) {
-        if (div.children('div').length>itemmax) {
-          div.children('div')[0].remove();
-        }      
-        // scroll
-        var height = div.height();
-        var pageHeight = $(window).height();
-        if (height > pageHeight) {
-          window.scrollTo(0, height - pageHeight);
-        }
-    } else {
-        if (div.children('div').length>itemlimit) {
-          div.children('div')[0].remove();
-        }
-    }
-}
-
 </script>
 </body>
 </html>

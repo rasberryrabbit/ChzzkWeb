@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<title>채팅 유저 리스트</title>
+<link rel="stylesheet" href="./jquery/jquery-ui.css" />
+<link type="text/css" rel="stylesheet" href="main.56f98435-dark.css" />
+<link type="text/css" rel="stylesheet" href="firework.css" />
+<script src = "./jquery/jquery-3.7.1.min.js"></script>
+<script src = "./jquery/jquery-ui.js"></script>
+<!-- link href="https://ssl.pstatic.net/static/nng/glive/resource/p/static/css/main.cb0f9f29.css" rel="stylesheet"-->
+<style>
+    #popup {
+        display: none;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+        background-color: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    #overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+    }    
+</style>
+<script>
+try {
+var chatsize = JSON.parse(localStorage.chatsize || "{}");
+} catch(e) {
+var chatsize = JSON.parse("{}");
+}
+var windowname='chatwindowchzzk';    // 단일 이름을 지정.
+$(document).ready(function(){
+  // load/save size
+  if(chatsize[windowname]) {
+    //$("#wrapper").width(chatsize[windowname].width);
+    //$("#wrapper").height(chatsize[windowname].height);
+  }
+  // make resizable
+  $("#wrapper").resizable({autoHide: true, stop: function (event, ui) {
+            chatsize[windowname] = ui.size;
+            localStorage.chatsize = JSON.stringify(chatsize);
+        }}); 
+});
+</script>
+</head> 
+<body>
+<button id="btnclear"><p style="border-radius: 8px;background-color:red;padding: 5px;width: 80px; height: 30px; color:white">리셋</p></button>
+<span id="usercount" style="display: inine-flex; background-color:glay;padding: 5px;color:blue">0</span>
+<div id="wrapper" style="padding: 10px">   
+    <div id="chatbox"></div>
+</div>
+<div style="border-radius: 6px; display: inline; padding: 5px;width: 80px; height: 30px; color:white; background:gray">
+<input type="radio" name="selusertype" value="all"><label for="all">모두</label></input>
+<input type="radio" name="selusertype" value="sub"><label for="sub">구독자</label></input>
+<input type="radio" name="selusertype" value="nosub"><label for="nosub">구독자 제외</label></input>
+</div>
+<button id="selectNumberBtn"><p style="border-radius: 8px;background-color:blue;padding: 5px;width: 80px; height: 30px; color:white">선택하기</p></button>
+<button id="choosenclear"><p style="margin-left:20px; border-radius: 8px;background-color:red;padding: 5px;width: 80px; height: 30px; color:white">선택리셋</p></button>
+<div id="choosen" style="padding: 10px"></div>
+<div id="overlay">
+    <div class="pyro" style="display:none">
+        <div class="before"></div>
+        <div class="after"></div>
+    </div>
+</div>
+<div id="popup">
+    <p id="selectedUser" style="padding: 10px; background: #111111ef; border-radius: 8px;"></p>
+    <div id="seluserchat" style="margin: 10px;"></div>
+    <p align="center" style="margin: 5px;">
+    <button id="closePopup" style="display: block; width: 80px; height: 30px;border-radius: 8px;background-color:red">닫기</button>
+    </p>
+</div>
+<script type="text/javascript" src="reconnecting-websocket.min.js"></script>
+<script type="text/javascript">
+var itemmax=3000;
+var itemlimit=3000;
+var doscroll=1;
+//
+$(window).on('scroll', function(){
+  var curpos=$(window).scrollTop();
+  var height = $("#chatbox").height();
+  var pageHeight = $(window).height();
+  doscroll=1;
+  if (height > pageHeight) {
+      if (curpos + pageHeight+60 >= height) {
+        doscroll=1;
+      } else {
+        doscroll=0;
+      }
+  }
+})
+
+var idlist={};
+var sublist={};
+var selidlist={};
+var reviewuser;
+//
+var chatsock1 = new ReconnectingWebSocket("ws://localhost:65002","chat");
+chatsock1.reconnectInterval=1000;
+chatsock1.onmessage = function (event) {
+    var div = $("#chatbox");
+    chatline=$(event.data).find("button").children();
+    username=$(chatline).find("span.name_text__yQG50").text();
+    if(idlist[username]==undefined) {
+      div.append(chatline);
+      idlist[username]=chatline;
+      // subscriber
+      iconinfo=$(chatline).find("span.live_chatting_username_wrapper__iJpJB");
+      if(iconinfo) {
+        sub=$(iconinfo).find("span.badge_container__a64XB");
+        if(sub) {
+          $(sub).each(function (index, item) {
+            ipos=$(item).children("img").attr("src").indexOf("/subscription/");
+            if(ipos>-1) {
+              if(sublist[username]==undefined) {
+                sublist[username]=1;
+                //console.log(username);
+              }
+            }
+          });
+        }
+      }
+      
+      var user=$("#usercount");
+      user.html(Object.values(idlist).length);
+      if (doscroll==1) {
+          if (div.children('div').length>itemmax) {
+            div.children('div')[0].remove();
+          }      
+          // scroll
+          var height = div.height();
+          var pageHeight = $(window).height();
+          if (height+30 > pageHeight) {
+            window.scrollTo(0, height - pageHeight + 30);
+          }
+      } else {
+          if (div.children('div').length>itemlimit) {
+            div.children('div')[0].remove();
+          }
+      }
+    } else if(reviewuser && username==reviewuser) {
+        // add chat message on user selection window
+        var userchat=$(event.data).clone();
+        $("#seluserchat").append(userchat[0]);
+    }
+}
+
+$("input[name='selusertype'][value='all']").prop("checked", true);
+
+document.getElementById("btnclear").addEventListener('click',clearuser);
+function clearuser(){
+  idlist={};
+  sublist={};
+  var div = $("#chatbox");
+  $(div).empty();
+  var user=$("#usercount");
+  user.html(Object.values(idlist).length);
+  selidlist={};
+  var choosen=$("#choosen");
+  $(choosen).empty();  
+}
+
+document.getElementById("choosenclear").addEventListener('click',choosenclearuser);
+function choosenclearuser(){
+  selidlist={};
+  var choosen=$("#choosen");
+  $(choosen).empty();
+}
+
+document.getElementById('selectNumberBtn').addEventListener('click', function() {
+    var idlistlen=Object.keys(idlist).length;
+    var subidlen=Object.keys(sublist).length;
+    var selidlen=Object.keys(selidlist).length;
+    if(!idlistlen || idlistlen==selidlen) return;
+    
+    // selected user iteration
+    var selsubidlen=0;
+    var selnosubidlen=0;
+    Object.entries(selidlist).forEach(([key, value]) => {
+      if(value==1) { selsubidlen+=1 }
+      else { selnosubidlen+=1 }
+    });
+
+    // check select user type
+    var checkuser = $('input:radio[name="selusertype"]:checked').val();
+    var usertype=0;
+    if(checkuser=='sub') {
+      usertype=1;
+      if(subidlen==selsubidlen) return;
+    } else if(checkuser=='nosub') {
+      usertype=2;
+      if(idlistlen-subidlen==selnosubidlen) return;
+    }
+
+    const popup = document.getElementById('popup');
+    const overlay = document.getElementById('overlay');
+    const selectedUser = document.getElementById('selectedUser');
+
+    popup.style.display = 'block';
+    overlay.style.display = 'block';
+    selectedUser.textContent = '';
+    reviewuser='';
+    $("#seluserchat").empty();
+    
+    // preview selection
+    function showitems() {
+        var num = Math.floor(Math.random() * idlistlen);
+        var idname=Object.keys(idlist)[num];
+        selectedUser.textContent = '';        
+        var newuser=idlist[idname].clone();
+        selectedUser.append(newuser[0]);
+    }
+    let idShow = setInterval(showitems , 100);
+    var keepsel=true;
+    $('#closePopup').css('background','red');
+
+    setTimeout(() => {
+        clearInterval(idShow);
+        while(keepsel && idlistlen && idlistlen>selidlen) {
+            idlistlen=Object.keys(idlist).length;
+            var num = Math.floor(Math.random() * idlistlen);
+            var idname=Object.keys(idlist)[num];
+            if(usertype==1) {
+              if(!sublist[idname]) continue;
+            } else if(usertype==2) {
+              if(sublist[idname]) continue;
+            }
+            selectedUser.textContent = '선택 중';
+            if(!selidlist[idname]) {
+              if(sublist[idname]) {
+                selidlist[idname]=1;
+              } else { 
+                selidlist[idname]=2;
+              }
+              break;
+            }
+        }
+        // got valid user
+        if(keepsel) {
+            $('#closePopup').css('background','#90EE90');
+            selectedUser.textContent = '';
+            var newuser=idlist[idname].clone();
+            selectedUser.append(newuser[0]);
+            var seluser=idlist[idname].clone();       
+            $("#choosen").append(seluser[0]);
+            reviewuser=idname;
+            $('.pyro').css('display','flex');
+        }
+    }, 3000);
+
+    document.getElementById('closePopup').addEventListener('click', function() {
+        keepsel=false;
+        popup.style.display = 'none';
+        overlay.style.display = 'none';
+        $('.pyro').css('display','none');
+    });
+});
+</script>
+</body>
+</html>
