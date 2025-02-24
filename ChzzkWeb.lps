@@ -22,8 +22,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ChzzkWeb_Main"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="451"/>
-        <CursorPos X="17" Y="470"/>
+        <TopLine Value="93"/>
+        <CursorPos X="15" Y="118"/>
         <UsageCount Value="130"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -345,18 +345,6 @@
     <JumpHistory HistoryIndex="29">
       <Position>
         <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="253" Column="3" TopLine="249"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="259" Column="31" TopLine="249"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="256" Column="46" TopLine="249"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
         <Caret Line="284" TopLine="276"/>
       </Position>
       <Position>
@@ -461,6 +449,18 @@
       <Position>
         <Filename Value="chzzkweb_main.pas"/>
         <Caret Line="108" Column="17" TopLine="96"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="466" Column="32" TopLine="457"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="105" Column="17" TopLine="96"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="480" Column="17" TopLine="463"/>
       </Position>
     </JumpHistory>
     <RunParams>
