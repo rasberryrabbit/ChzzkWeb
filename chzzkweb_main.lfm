@@ -16,24 +16,24 @@ object FormChzzkWeb: TFormChzzkWeb
   OnShow = FormShow
   object CEFWindowParent1: TCEFWindowParent
     Left = 8
-    Height = 528
-    Top = 88
+    Height = 544
+    Top = 72
     Width = 1010
     Anchors = [akTop, akLeft, akRight, akBottom]
-    TabOrder = 1
+    TabOrder = 0
   end
   object ButtonHome: TButton
     Left = 8
     Height = 25
-    Top = 48
+    Top = 40
     Width = 75
     Caption = '치지직 홈'
-    TabOrder = 2
+    TabOrder = 1
     OnClick = ButtonHomeClick
   end
   object Label1: TLabel
     Left = 96
-    Height = 34
+    Height = 31
     Top = 8
     Width = 480
     AutoSize = False
@@ -43,28 +43,21 @@ object FormChzzkWeb: TFormChzzkWeb
   object Editurl: TEdit
     Left = 96
     Height = 23
-    Top = 50
+    Top = 40
     Width = 857
     Anchors = [akTop, akLeft, akRight]
-    TabOrder = 3
+    TabOrder = 2
     OnKeyPress = EditurlKeyPress
   end
   object ButtonGo: TButton
-    Left = 961
+    Left = 960
     Height = 25
-    Top = 48
+    Top = 40
     Width = 56
     Anchors = [akTop, akRight]
     Caption = 'Go'
-    TabOrder = 4
+    TabOrder = 3
     OnClick = ButtonGoClick
-  end
-  object JvXPButton1: TJvXPButton
-    Left = 8
-    Top = 16
-    Caption = '실행 중'
-    TabOrder = 0
-    OnClick = JvXPButton1Click
   end
   object Chromium1: TChromium
     OnProcessMessageReceived = Chromium1ProcessMessageReceived
@@ -133,12 +126,20 @@ object FormChzzkWeb: TFormChzzkWeb
       Caption = '유저 리스트'
       OnExecute = ActionChatuserExecute
     end
+    object ActionWSLog: TAction
+      Caption = '로깅'
+      Checked = True
+      OnExecute = ActionWSLogExecute
+    end
   end
   object MainMenu1: TMainMenu
     Left = 200
     Top = 83
     object MenuItem1: TMenuItem
       Caption = '웹소켓(&W)'
+      object MenuItem11: TMenuItem
+        Action = ActionWSLog
+      end
       object MenuItem2: TMenuItem
         Action = ActionWSPort
       end

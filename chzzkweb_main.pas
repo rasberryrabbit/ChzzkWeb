@@ -20,6 +20,7 @@ type
   { TFormChzzkWeb }
 
   TFormChzzkWeb = class(TForm)
+    ActionWSLog: TAction;
     ActionChatuser: TAction;
     ActionWSockUnique: TAction;
     ActionOpenChatFull: TAction;
@@ -34,11 +35,11 @@ type
     CEFWindowParent1: TCEFWindowParent;
     Chromium1: TChromium;
     Editurl: TEdit;
-    JvXPButton1: TJvXPButton;
     Label1: TLabel;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
+    MenuItem11: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
@@ -58,6 +59,7 @@ type
     procedure ActionOpenChatExecute(Sender: TObject);
     procedure ActionOpenChatFullExecute(Sender: TObject);
     procedure ActionOpenNotifyExecute(Sender: TObject);
+    procedure ActionWSLogExecute(Sender: TObject);
     procedure ActionWSockUniqueExecute(Sender: TObject);
     procedure ActionWSPortExecute(Sender: TObject);
     procedure ButtonHomeClick(Sender: TObject);
@@ -110,6 +112,7 @@ type
     procedure CEFCreated(var Msg:TLMessage); message CEF_AFTERCREATED;
     procedure CEFDestroy(var Msg:TLMessage); message CEF_DESTROY;
   protected
+    // prevent crash on CEF close
     FClosing: Boolean;
     FCanClose: Boolean;
   public
@@ -164,13 +167,12 @@ const
 
 
 var
-  WSPortChat: string = '65002';
-  WSPortSys: string = '65003';
+  WSPortChat: string = '63002';
+  WSPortSys: string = '63003';
   WSPortUnique: Boolean = False;
   SockServerChat: TSimpleWebsocketServer;
   SockServerSys: TSimpleWebsocketServer;
   ProcessSysChat: Boolean = False;
-  //CEFDebugLog: Boolean = False;
   IncludeChatTime: Boolean = False;
   chatlog_full: string = 'doc\webchatlog_list.html';
   chatlog_full_unique: string = 'doc\webchatlog_list_unique.html';
@@ -195,13 +197,13 @@ var
   ir, i: Integer;
   port: string;
 begin
-  ir:=InputCombo('웹소켓 포트','웹소켓 포트를 지정',['65002','65010','65020','65030','65040']);
+  ir:=InputCombo('웹소켓 포트','웹소켓 포트를 지정',['63002','63010','63020','63030','63040']);
   case ir of
-  1: WSPortChat:='65002';
-  2: WSPortChat:='65010';
-  3: WSPortChat:='65020';
-  4: WSPortChat:='65030';
-  5: WSPortChat:='65040';
+  1: WSPortChat:='63002';
+  2: WSPortChat:='63010';
+  3: WSPortChat:='63020';
+  4: WSPortChat:='63030';
+  5: WSPortChat:='63040';
   end;
   if ir<>-1 then
     begin
@@ -229,7 +231,10 @@ end;
 
 procedure TFormChzzkWeb.ActionOpenChatFullExecute(Sender: TObject);
 begin
-  ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_full)),nil,nil,SW_SHOWNORMAL);
+  if not WSPortUnique then
+   ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_full)),nil,nil,SW_SHOWNORMAL)
+   else
+    ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_full_unique)),nil,nil,SW_SHOWNORMAL)
 end;
 
 procedure TFormChzzkWeb.ActionDebugLogExecute(Sender: TObject);
@@ -253,6 +258,12 @@ end;
 procedure TFormChzzkWeb.ActionOpenNotifyExecute(Sender: TObject);
 begin
   ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_donation)),nil,nil,SW_SHOWNORMAL);
+end;
+
+procedure TFormChzzkWeb.ActionWSLogExecute(Sender: TObject);
+begin
+  ActionWSLog.Checked:=not ActionWSLog.Checked;
+  Timer2.Enabled:=ActionWSLog.Checked;
 end;
 
 procedure TFormChzzkWeb.ActionWSockUniqueExecute(Sender: TObject);
@@ -289,6 +300,7 @@ end;
 procedure TFormChzzkWeb.Chromium1BeforeClose(Sender: TObject;
   const browser: ICefBrowser);
 begin
+  // prevent crash on CEF close
   FCanClose := True;
   PostMessage(Handle, WM_CLOSE, 0,0);
 end;
@@ -402,8 +414,8 @@ end;
 
 procedure TFormChzzkWeb.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
+  // prevent crash on CEF close
   CanClose := FCanClose;
-
   if not(FClosing) then
     begin
       FClosing := True;
@@ -415,6 +427,7 @@ end;
 
 procedure TFormChzzkWeb.FormCreate(Sender: TObject);
 begin
+  // prevent crash on CEF close
   FClosing:=False;
   FCanClose:=False;
 end;
@@ -424,21 +437,22 @@ begin
   SockServerChat.Free;
   SockServerSys.Free;
   XMLConfig1.SetValue('CHAT/FULL',UTF8Decode(chatlog_full));
+  XMLConfig1.SetValue('CHAT/FULLUNIQUE',UTF8Decode(chatlog_full_unique));
   XMLConfig1.SetValue('CHAT/CHAT',UTF8Decode(chatlog_chatonly));
   XMLConfig1.SetValue('CHAT/DONATION',UTF8Decode(chatlog_donation));
+  XMLConfig1.SetValue('CHAT/USERID',UTF8Decode(chatlog_userid));
   if XMLConfig1.Modified then
     XMLConfig1.SaveToFile('config.xml');
 end;
 
 procedure TFormChzzkWeb.FormShow(Sender: TObject);
 begin
-
   if FileExists('config.xml') then
     XMLConfig1.LoadFromFile('config.xml');
 
   IncludeChatTime:=XMLConfig1.GetValue('IncludeTime',False);
-  WSPortChat:=XMLConfig1.GetValue('WS/PORT','65002');
-  WSPortSys:=XMLConfig1.GetValue('WS/PORTSYS','65003');
+  WSPortChat:=XMLConfig1.GetValue('WS/PORT','63002');
+  WSPortSys:=XMLConfig1.GetValue('WS/PORTSYS','63003');
   WSPortUnique:=XMLConfig1.GetValue('WS/UNIQUE',WSPortUnique);
   ActionChatTime.Checked:=IncludeChatTime;
   ActionWSockUnique.Checked:=WSPortUnique;
@@ -457,11 +471,6 @@ end;
 
 procedure TFormChzzkWeb.JvXPButton1Click(Sender: TObject);
 begin
-  Timer2.Enabled:=not Timer2.Enabled;
-  if Timer2.Enabled then
-    JvXPButton1.Caption:='실행 중'
-    else
-      JvXPButton1.Caption:='대기 중';
 end;
 
 procedure TFormChzzkWeb.Timer1Timer(Sender: TObject);
@@ -499,7 +508,7 @@ end;
 
 procedure TFormChzzkWeb.CEFDestroy(var Msg: TLMessage);
 begin
-  CEFWindowParent1.Free;
+  //CEFWindowParent1.Free;
   if XMLConfig1.Modified then
     XMLConfig1.SaveToFile('config.xml');
   Msg.Result:=-1;
@@ -525,8 +534,8 @@ begin
   j:=0;
   if not TryStrToInt(WSPortChat,i) then
   begin
-    WSPortChat:='65002';
-    i:=65002;
+    WSPortChat:='63002';
+    i:=63002;
   end;
   while j<8 do begin
     try
@@ -628,7 +637,7 @@ begin
   GlobalCEFApp.LogFile             := 'debug.log';
   GlobalCEFApp.LogSeverity         := LOGSEVERITY_ERROR;
   GlobalCEFApp.EnablePrintPreview  := False;
-  //GlobalCEFApp.EnableGPU           := True;
+  GlobalCEFApp.EnableGPU           := True;
   GlobalCEFApp.SetCurrentDir       := True;
   GlobalCEFApp.CheckCEFFiles       := False;
   //GlobalCEFApp.SingleProcess       := True;
