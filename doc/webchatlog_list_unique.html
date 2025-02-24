@@ -54,7 +54,7 @@ $(window).on('scroll', function(){
 })
 
 //
-var chatsock1 = new ReconnectingWebSocket("ws://localhost:65002","chat");
+var chatsock1 = new ReconnectingWebSocket("ws://localhost:63002","chat");
 chatsock1.reconnectInterval=1000;
 chatsock1.onmessage = function (event) {
     var div = $("#chatbox");

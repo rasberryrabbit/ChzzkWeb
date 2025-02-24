@@ -64,7 +64,7 @@ $("#chatbox").mouseup(function(){
 
 //
 var randomcolor=1;
-var chatsock = new ReconnectingWebSocket("ws://localhost:65002","chat");
+var chatsock = new ReconnectingWebSocket("ws://localhost:63002","chat");
 chatsock.reconnectInterval=2000;
 chatsock.onmessage = function (event) {
     var div = $("#chatbox");
