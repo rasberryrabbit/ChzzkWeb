@@ -461,6 +461,7 @@ begin
   // Send Message to Renderer for parsing
   if 0<Pos('chzzk.naver.com/live/',Chromium1.DocumentURL) then
     Chromium1.ExecuteJavaScript(cqueryjs,'');
+  Msg.Result:=-1;
 end;
 
 procedure TFormChzzkWeb.CEFCreated(var Msg: TLMessage);
@@ -468,6 +469,7 @@ begin
   CEFWindowParent1.UpdateSize;
   // loading chzzk live
   ButtonGo.Click;
+  Msg.Result:=-1;
 end;
 
 procedure TFormChzzkWeb.CEFDestroy(var Msg: TLMessage);
@@ -475,6 +477,7 @@ begin
   CEFWindowParent1.Free;
   if XMLConfig1.Modified then
     XMLConfig1.SaveToFile('config.xml');
+  Msg.Result:=-1;
 end;
 
 procedure TFormChzzkWeb.SetFormCaption;
