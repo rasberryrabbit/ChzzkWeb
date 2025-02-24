@@ -126,6 +126,10 @@ object FormChzzkWeb: TFormChzzkWeb
       Caption = '단일 웹소켓 사용'
       OnExecute = ActionWSockUniqueExecute
     end
+    object ActionChatuser: TAction
+      Caption = '유저 리스트'
+      OnExecute = ActionChatuserExecute
+    end
   end
   object MainMenu1: TMainMenu
     Left = 200
@@ -147,15 +151,12 @@ object FormChzzkWeb: TFormChzzkWeb
       object MenuItem9: TMenuItem
         Action = ActionOpenChatFull
       end
+      object MenuItem7: TMenuItem
+        Action = ActionChatuser
+      end
     end
     object MenuItem6: TMenuItem
       Caption = '기타(&M)'
-      object MenuItem7: TMenuItem
-        Action = ActionDebugLog
-      end
-      object MenuItem8: TMenuItem
-        Action = ActionChatTime
-      end
       object MenuItem10: TMenuItem
         Action = ActionWSockUnique
       end

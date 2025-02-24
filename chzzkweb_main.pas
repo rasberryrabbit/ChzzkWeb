@@ -21,6 +21,7 @@ type
   { TFormChzzkWeb }
 
   TFormChzzkWeb = class(TForm)
+    ActionChatuser: TAction;
     ActionWSockUnique: TAction;
     ActionOpenChatFull: TAction;
     ActionChatTime: TAction;
@@ -45,7 +46,6 @@ type
     MenuItem5: TMenuItem;
     MenuItem6: TMenuItem;
     MenuItem7: TMenuItem;
-    MenuItem8: TMenuItem;
     MenuItem9: TMenuItem;
     RxVersionInfo1: TRxVersionInfo;
     Timer1: TTimer;
@@ -53,6 +53,7 @@ type
     UniqueInstance1: TUniqueInstance;
     XMLConfig1: TXMLConfig;
     procedure ActionChatTimeExecute(Sender: TObject);
+    procedure ActionChatuserExecute(Sender: TObject);
     procedure ActionDebugLogExecute(Sender: TObject);
     procedure ActionOpenChatExecute(Sender: TObject);
     procedure ActionOpenChatFullExecute(Sender: TObject);
@@ -238,6 +239,11 @@ begin
   ActionChatTime.Checked:=not ActionChatTime.Checked;
   IncludeChatTime:=ActionChatTime.Checked;
   XMLConfig1.SetValue('IncludeTime',IncludeChatTime);
+end;
+
+procedure TFormChzzkWeb.ActionChatuserExecute(Sender: TObject);
+begin
+  ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_userid)),nil,nil,SW_SHOWNORMAL);
 end;
 
 procedure TFormChzzkWeb.ActionOpenNotifyExecute(Sender: TObject);

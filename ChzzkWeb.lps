@@ -21,8 +21,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ChzzkWeb_Main"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="353"/>
-        <CursorPos X="9" Y="372"/>
+        <TopLine Value="238"/>
+        <CursorPos X="3" Y="246"/>
         <UsageCount Value="130"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -344,26 +344,6 @@
     <JumpHistory HistoryIndex="29">
       <Position>
         <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="500" Column="46" TopLine="475"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="279" Column="27" TopLine="248"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="280" Column="30" TopLine="255"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="273" Column="27" TopLine="255"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="292" Column="23" TopLine="279"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
         <Caret Line="509" Column="21" TopLine="497"/>
       </Position>
       <Position>
@@ -460,6 +440,26 @@
       <Position>
         <Filename Value="chzzkweb_main.pas"/>
         <Caret Line="355" Column="34" TopLine="342"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="233" Column="31"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="234" Column="31" TopLine="209"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="233" Column="31" TopLine="208"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="232" Column="31" TopLine="207"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="234" Column="31" TopLine="209"/>
       </Position>
     </JumpHistory>
     <RunParams>
