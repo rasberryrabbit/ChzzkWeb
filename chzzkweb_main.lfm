@@ -13,7 +13,7 @@ object FormChzzkWeb: TFormChzzkWeb
   OnShow = FormShow
   object CEFWindowParent1: TCEFWindowParent
     Left = 8
-    Height = 522
+    Height = 528
     Top = 88
     Width = 1010
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -69,9 +69,11 @@ object FormChzzkWeb: TFormChzzkWeb
     OnAddressChange = Chromium1AddressChange
     OnLoadingProgressChange = Chromium1LoadingProgressChange
     OnBeforePopup = Chromium1BeforePopup
+    OnBeforeDevToolsPopup = Chromium1BeforeDevToolsPopup
     OnAfterCreated = Chromium1AfterCreated
     OnBeforeClose = Chromium1BeforeClose
     OnClose = Chromium1Close
+    OnChromeCommand = Chromium1ChromeCommand
     Left = 24
     Top = 80
   end
@@ -82,7 +84,7 @@ object FormChzzkWeb: TFormChzzkWeb
     Top = 144
   end
   object Timer2: TTimer
-    Interval = 100
+    Interval = 300
     OnTimer = Timer2Timer
     Left = 104
     Top = 144

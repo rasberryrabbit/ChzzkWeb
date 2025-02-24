@@ -9,15 +9,12 @@ uses
   uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants,
   uCEFInterfaces, uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages,
   ExtCtrls, ActnList, Menus, uCEFWinControl, UniqueInstance, JvXPButtons,
-  RxVersInfo;
+  RxVersInfo, uWebExtHandler;
 
 
 const
-  MSGVISITDOM = LM_USER+$102;
-  SVISITDOM   = 'V_RENDERER';
-  SLOGCHAT = 'V_LOGCHAT';
-  SLOGSYS = 'V_LOGSYS';
-  strhidden = 'hidden';
+  LM_Execute_script = LM_USER+$102;
+  LM_Return_Value = LM_USER+$103;
 
 type
 
@@ -71,6 +68,10 @@ type
     procedure Chromium1AfterCreated(Sender: TObject; const browser: ICefBrowser
       );
     procedure Chromium1BeforeClose(Sender: TObject; const browser: ICefBrowser);
+    procedure Chromium1BeforeDevToolsPopup(Sender: TObject;
+      const browser: ICefBrowser; var windowInfo: TCefWindowInfo;
+      var client: ICefClient; var settings: TCefBrowserSettings;
+      var extra_info: ICefDictionaryValue; var use_default_window: boolean);
     procedure Chromium1BeforePopup(Sender: TObject; const browser: ICefBrowser;
       const frame: ICefFrame; const targetUrl, targetFrameName: ustring;
       targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean;
@@ -78,6 +79,9 @@ type
       var client: ICefClient; var settings: TCefBrowserSettings;
       var extra_info: ICefDictionaryValue; var noJavascriptAccess: Boolean;
       var Result: Boolean);
+    procedure Chromium1ChromeCommand(Sender: TObject;
+      const browser: ICefBrowser; command_id: integer;
+      disposition: TCefWindowOpenDisposition; var aResult: boolean);
     procedure Chromium1Close(Sender: TObject; const browser: ICefBrowser;
       var aAction: TCefCloseBrowserAction);
     procedure Chromium1LoadingProgressChange(Sender: TObject;
@@ -97,13 +101,17 @@ type
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
   private
-    procedure VISITDOM(var Msg:TLMessage); message MSGVISITDOM;
+    procedure ExecuteScript(var Msg:TLMessage); message LM_Execute_script;
+    procedure ReceiveResult(var Msg:TLMessage); message LM_Return_Value;
 
     // CEF
     procedure CEFCreated(var Msg:TLMessage); message CEF_AFTERCREATED;
     procedure CEFDestroy(var Msg:TLMessage); message CEF_DESTROY;
   public
     procedure SetFormCaption;
+
+    procedure SetUpWebSocketPort;
+    procedure ReplaceWSPortHTML(const fname, port1, port2: string);
 
   end;
 
@@ -116,7 +124,7 @@ implementation
 
 uses
   uCEFMiscFunctions, uCEFProcessMessage, uCEFDomVisitor, uCEFStringMap,
-  Windows, uWebsockSimple, uChecksumList, ShellApi, DateUtils, StrUtils,
+  Windows, uWebsockSimple, ShellApi, DateUtils, StrUtils,
   regexpr;
 
 
@@ -124,6 +132,31 @@ uses
 
 const
   MaxLength = 2048;
+  cqueryjs = 'var obser=document.querySelector("div.live_chatting_list_wrapper__a5XTV");'+
+             'if(obser) {'+
+             'browserExt.postMessage("!Observer Start!");'+
+             'const observer = new MutationObserver((mutations) => {'+
+             'mutations.forEach(mutat => {'+
+             'mutat.addedNodes.forEach(node => {'+
+             'browserExt.postMessage(node.outerHTML);'+
+             '});'+
+             '});'+
+             '});'+
+             'observer.observe(obser, {'+
+             '    subtree: false,'+
+             '    attributes: false,'+
+             '    childList: true,'+
+             '    characterData: false,'+
+             '    });'+
+             'observer.start();'+
+             'window.addEventListener(''unload'', function() {'+
+             '  observer.disconnect();'+
+             '});'+
+             '}';
+
+  syschat_str = '0SGhw live_chatting_list';
+  syschat_guide = 'live_chatting_guide_';
+
 
 var
   WSPortChat: string = '65002';
@@ -132,397 +165,17 @@ var
   SockServerChat: TSimpleWebsocketServer;
   SockServerSys: TSimpleWebsocketServer;
   ProcessSysChat: Boolean = False;
-  CheckHidden: TDigest;
-  CEFDebugLog: Boolean = False;
-  iCountVisit: Integer = 0;
+  //CEFDebugLog: Boolean = False;
   IncludeChatTime: Boolean = False;
   chatlog_full: string = 'doc\webchatlog_list.html';
-  chatlog_donation: string = '\doc\도네_구독_메시지.html';
-  chatlog_chatonly: string = 'doc\채팅.html';
+  chatlog_full_unique: string = 'doc\webchatlog_list_unique.html';
+  chatlog_donation: string = 'doc\webchatlog_donation_sub.html';
+  chatlog_chatonly: string = 'doc\webchatlog_chatbox.html';
+  chatlog_userid: string = 'doc\webchatlog_user_unique.html';
   stripusertooltip: TRegExpr;
-
-
-
-function GetChatMarkup(Node: ICefDomNode):ustring;
-const
-  taguser = '<span class="name_text__';
-var
-  utxt: ustring;
-  ix: Integer;
-begin
-  Result:='';
-  if Assigned(Node) then
-    begin
-      utxt:=Node.AsMarkup;
-      ix:=Pos(taguser,utxt);
-      if ix>0 then
-        Result:=Copy(utxt,ix);
-    end;
-  if Result='' then
-    Result:=strhidden;
-end;
-
-function GetNonChatMarkup(Node: ICefDomNode):ustring;
-var
-  temp: ICefDomNode;
-begin
-  Result:='subscribe';
-  if Assigned(Node) then
-    begin
-      temp:=Node.FirstChild;
-      if Assigned(temp) then
-        begin
-          temp:=temp.FirstChild;
-          if Assigned(temp) then
-            Result:=temp.AsMarkup;
-        end;
-    end;
-end;
-
-{function GetElementAttr(const Node: ICefDomNode):ustring;
-var
-  attr: ICefStringMap;
-begin
-  attr:=TCefStringMapOwn.Create;
-  try
-    Node.GetElementAttributes(attr);
-    Result:=attr.Find('class');
-  finally
-    attr:=nil;
-  end;
-end;}
-
-function CheckElementAttr(const str: ustring; const Node: ICefDomNode):Boolean;
-var
-  markup: ustring;
-  ia, ib, ic, id: Integer;
-begin
-  {Result:=False;
-  markup:=Node.AsMarkup;
-  ia:=Pos('class',markup);
-  if ia>0 then
-    begin
-      ib:=PosEx('"',markup,ia);
-      if ib>0 then
-        begin
-          ic:=PosEx('"',markup,ib+1);
-          if ic>0 then
-            begin
-              id:=PosEx(str,markup,ib);
-              Result:=(id>0) and (id<ic);
-            end;
-        end;
-    end;}
-  Result:=Pos(str,Node.GetElementAttribute('class'))>0;
-end;
-
-function ExtractChat(const ANode: ICefDomNode; var Res:ICefDomNode; const aFrame: ICefFrame):Boolean;
-const
-  nonchatclass = ' live_chatting_list_';
-  hiddenchatclass = '_message_is_hidden';
-  chatclass = 'live_chatting_list_item';
-  chatcontainer = 'live_chatting_list_wrapper';
-  chatguide = '_list_guide_';
-  chatdonation = '_list_donation_';
-  chatsubscription = '_list_subscription_';
-var
-  TempChild, ChatNode, ChatBottom, ChatFirst, ChatComp, ChatCon: ICefDomNode;
-  nodeattr: ustring;
-
-  CheckItem, CheckItemLast: TDigest;
-  pBuild, pPrev: pChecksumData;
-  DupCount, PrevCount: Integer;
-  s: UnicodeString;
-  bMake, bCompare, bDup, bHidden: Boolean;
-
-  Msg: ICefProcessMessage;
-begin
-  Result:=False;
-  TempChild:=ANode;
-  try
-  if TempChild<>nil then
-    begin
-      // search chat list
-      while TempChild<>nil do
-        begin
-          if (TempChild.Name='DIV') and CheckElementAttr(chatcontainer,TempChild) then
-            begin
-              Res:=TempChild;
-              Result:=True;
-              break;
-            end;
-          if TempChild.HasChildren then
-            begin
-              if ExtractChat(TempChild.FirstChild,Res,aFrame) then
-                break;
-            end;
-          TempChild:=TempChild.NextSibling;
-        end;
-      // process chat list
-      if Res<>nil then
-        begin
-          TempChild:=Res;
-          Res:=nil;
-          // search chat DOM
-          if (TempChild.Name='DIV') and CheckElementAttr(chatcontainer, TempChild) then
-            begin
-              //Res:=TempChild;
-              ChatNode:=TempChild.LastChild;
-
-              CheckBuild.Clear;
-              ChatBottom:=ChatNode;
-              ChatFirst:=nil;
-              bCompare:=True;
-              bMake:=True;
-              bDup:=False;
-              MakeCheck('',CheckItemLast);
-              DupCount:=0;
-              // chat log
-              while ChatNode<>nil do
-                begin
-                  nodeattr:=ChatNode.AsMarkup;
-                  // chat only
-                  if (POS(chatclass,nodeattr)<>0) then
-                       begin
-                         bHidden:=False;
-                         // chat
-                         if ChatBottom=nil then
-                           ChatBottom:=ChatNode;
-
-                         // build checksum list
-                         if bMake then
-                           begin
-                             // non-chat class
-                             if Pos(nonchatclass,nodeattr)<>0 then
-                               begin
-                                 s:=GetNonChatMarkup(ChatNode);
-                                 MakeCheck(copy(s,1,MaxLength),CheckItem);
-                                 bHidden:=True;
-                                 //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<38> ' + s);
-                               end;
-                             if not bHidden then
-                               begin
-                                 // make checksum
-                                 s:=GetChatMarkup(ChatNode);
-                                 MakeCheck(copy(s,1,MaxLength),CheckItem);
-                                 //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<30> ' + s);
-                               end;
-
-                             bDup:=CompareCheck(CheckItem,CheckItemLast);
-                             if bDup then
-                               Inc(DupCount)
-                               else
-                                 DupCount:=0;
-                             CheckItemLast:=CheckItem;
-                             if bDup then
-                               begin
-                                 pBuild^.dup:=DupCount;
-                               end else
-                                 begin
-                                   if CheckBuild.Count<MaxChecksumList then
-                                     begin
-                                       pBuild:=CheckBuild.AddCheck;
-                                       pBuild^.Checksum:=CheckItem;
-                                     end
-                                   else
-                                     bMake:=False;
-                                 end;
-                           end;
-                         // compare checksum
-                         if bCompare then
-                           begin
-                             ChatComp:=ChatNode;
-                             pPrev:=CheckPrev.FirstCheck;
-                             if pPrev<>nil then
-                               PrevCount:=pPrev^.dup;
-                             while ChatComp<>nil do
-                               begin
-                                 bHidden:=False;
-                                 // compare chat only
-                                 nodeattr:=ChatComp.AsMarkup;
-                                 if (POS(chatclass,nodeattr)<>0) then
-                                   begin
-                                     // non-chat class
-                                     if Pos(nonchatclass,nodeattr)<>0 then
-                                       begin
-                                         s:=GetNonChatMarkup(ChatComp);
-                                         MakeCheck(copy(s,1,MaxLength),CheckItem);
-                                         bHidden:=True;
-                                         //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<38> ' + s);
-                                       end;
-                                     // check hidden message
-                                     if not bHidden then
-                                       begin
-                                         ChatCon:=ChatComp.GetFirstChild;
-                                         if Assigned(ChatCon) then
-                                           begin
-                                             nodeattr:=ChatCon.AsMarkup;
-                                             if CheckElementAttr(hiddenchatclass,ChatCon) then
-                                               begin
-                                                 if pPrev<>nil then
-                                                   CheckItem:=pPrev^.Checksum;
-                                                 bHidden:=True;
-                                                 //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<30> ');
-                                               end;
-                                           end;
-                                       end;
-                                     if not bHidden then
-                                       begin
-                                         // make checksum
-                                         s:=GetChatMarkup(ChatComp);
-                                         MakeCheck(copy(s,1,MaxLength),CheckItem);
-                                         //CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<30> '+ s);
-                                       end;
-
-                                     // compare
-                                     if CheckPrev.Count>0 then
-                                       begin
-                                         // equal item checksum
-                                         if CompareCheck(CheckItem,pPrev^.Checksum) then
-                                           begin
-                                             if PrevCount>0 then
-                                               Dec(PrevCount)
-                                               else
-                                                 begin
-                                                   pPrev:=CheckPrev.NextCheck;
-                                                   if pPrev=nil then
-                                                     begin
-                                                       bCompare:=False;
-                                                       break;
-                                                     end else
-                                                       PrevCount:=pPrev^.dup;
-                                                 end;
-                                           end
-                                           else
-                                           begin
-                                             ChatFirst:=ChatNode;
-                                             break;
-                                           end;
-                                       end
-                                       else
-                                       begin
-                                         ChatFirst:=ChatNode;
-                                         break;
-                                       end;
-                                   end;
-                                 ChatComp:=ChatComp.PreviousSibling;
-                               end;
-                           end;
-                       end;
-                  ChatNode:=ChatNode.PreviousSibling;
-                end;
-                //
-                CheckPrev.CopyData(CheckBuild);
-                // process new chat
-                ChatNode:=ChatFirst;
-                while ChatNode<>nil do
-                  begin
-                    nodeattr:=ChatNode.AsMarkup;
-                    if (POS(chatclass,nodeattr)<>0) then
-                    begin
-                      if (Pos(chatdonation,nodeattr)<>0) or
-                         (Pos(chatsubscription,nodeattr)<>0) then
-                        begin
-                          // subscription, donation
-                          Msg:=TCefProcessMessageRef.New(SLOGSYS);
-                          try
-                            Msg.ArgumentList.SetString(0,nodeattr);
-                            if (aFrame<>nil) and aFrame.IsValid then
-                              aFrame.SendProcessMessage(PID_BROWSER,Msg);
-                          finally
-                            Msg:=nil;
-                          end;
-                          if CEFDebugLog then
-                            CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<5> ' + ChatNode.ElementInnerText);
-                        end else
-                        if (Pos(chatguide,nodeattr)=0) then
-                        begin
-                          // chatting
-                          Msg:=TCefProcessMessageRef.New(SLOGCHAT);
-                          try
-                            Msg.ArgumentList.SetString(0,nodeattr);
-                            if (aFrame<>nil) and aFrame.IsValid then
-                              aFrame.SendProcessMessage(PID_BROWSER,Msg);
-                          finally
-                            Msg:=nil;
-                          end;
-                          if CEFDebugLog then
-                            CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<4> ' + ChatNode.ElementInnerText);
-                        end;
-                    end;
-                    if ChatNode=ChatBottom then
-                      break;
-                    ChatNode:=ChatNode.NextSibling;
-                  end;
-            end;
-        end;
-    end;
-  except
-    on e: exception do
-      if CustomExceptionHandler('',e) then
-        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, '<30> ' + e.Message);
-  end;
-end;
-
-procedure SimpleDOMIteration(const aDocument: ICefDomDocument; const aFrame: ICefFrame);
-var
-  TempBody, Res : ICefDomNode;
-begin
-  Res:=nil;
-  if (aDocument <> nil) then
-    begin
-      // body
-      TempBody := aDocument.Body;
-      if TempBody <> nil then
-        begin
-          ExtractChat(TempBody.FirstChild,Res, aFrame);
-        end;
-    end;
-end;
-
-
-procedure DOMVisitor_OnDocAvailable(const browser: ICefBrowser; const frame: ICefFrame; const document: ICefDomDocument);
-const
-  ChzzkURL ='chzzk.naver.com/live/';
-begin
-  // This function is called from a different process.
-  // document is only valid inside this function.
-  if Assigned(browser) and Assigned(frame) then
-    begin
-      if POS(ChzzkURL,frame.Url)=0 then
-        exit;
-      if CEFDebugLog then
-        CefLog('ChzzkWeb', 1, CEF_LOG_SEVERITY_ERROR, 'document.Title : ' + document.Title);
-
-      // Simple DOM iteration example
-      SimpleDOMIteration(document, frame);
-    end;
-end;
-
-procedure GlobalCEFApp_OnProcessMessageReceived(const browser       : ICefBrowser;
-                                                const frame         : ICefFrame;
-                                                      sourceProcess : TCefProcessId;
-                                                const message       : ICefProcessMessage;
-                                                var   aHandled      : boolean);
-var
-  TempVisitor : TCefFastDomVisitor2;
-begin
-  // browser renderer message
-  aHandled := False;
-
-  if (browser <> nil) then
-    begin
-      if (message.name = SVISITDOM) then
-        begin
-          if (frame <> nil) and frame.IsValid then
-            begin
-              TempVisitor := TCefFastDomVisitor2.Create(browser, frame, @DOMVisitor_OnDocAvailable);
-              frame.VisitDom(TempVisitor);
-            end;
-          aHandled := True;
-        end;
-    end;
-end;
+  PageLoaded: Boolean = False;
+  observer_started: Boolean = False;
+  FTemp: ustring;
 
 
 { TFormChzzkWeb }
@@ -547,16 +200,20 @@ begin
   end;
   if ir<>-1 then
     begin
-      SockServerChat.Free;
-      SockServerChat:=TSimpleWebsocketServer.Create(WSPortChat);
-      SockServerSys.Free;
-      i:=StrToIntDef(WSPortChat,65002);
-      Inc(i);
-      WSPortSys:=IntToStr(i);
-      SockServerSys:=TSimpleWebsocketServer.Create(WSPortSys);
-      XMLConfig1.SetValue('WS/PORT',WSPortChat);
-      XMLConfig1.SetValue('WS/PORTSYS',WSPortSys);
-      SetFormCaption;
+      try
+        SetUpWebSocketPort;
+        ReplaceWSPortHTML(chatlog_chatonly,WSPortChat,'');
+        ReplaceWSPortHTML(chatlog_donation,WSPortSys,'');
+        ReplaceWSPortHTML(chatlog_userid,WSPortChat,'');
+        ReplaceWSPortHTML(chatlog_full_unique,WSPortChat,'');
+        ReplaceWSPortHTML(chatlog_full,WSPortChat,WSPortSys);
+        XMLConfig1.SetValue('WS/PORT',WSPortChat);
+        XMLConfig1.SetValue('WS/PORTSYS',WSPortSys);
+        SetFormCaption;
+      except
+        on e:exception do
+          ShowMessage(e.Message);
+      end;
     end;
 end;
 
@@ -573,7 +230,7 @@ end;
 procedure TFormChzzkWeb.ActionDebugLogExecute(Sender: TObject);
 begin
   ActionDebugLog.Checked:=not ActionDebugLog.Checked;
-  CEFDebugLog:=ActionDebugLog.Checked;
+  //CEFDebugLog:=ActionDebugLog.Checked;
 end;
 
 procedure TFormChzzkWeb.ActionChatTimeExecute(Sender: TObject);
@@ -609,6 +266,8 @@ procedure TFormChzzkWeb.Chromium1AddressChange(Sender: TObject;
   const browser: ICefBrowser; const frame: ICefFrame; const url: ustring);
 begin
   Editurl.Text:=url;
+  observer_started:=False;
+  Timer2.Enabled:=True;
 end;
 
 procedure TFormChzzkWeb.Chromium1AfterCreated(Sender: TObject;
@@ -623,6 +282,14 @@ begin
   PostMessage(Handle, WM_CLOSE, 0,0);
 end;
 
+procedure TFormChzzkWeb.Chromium1BeforeDevToolsPopup(Sender: TObject;
+  const browser: ICefBrowser; var windowInfo: TCefWindowInfo;
+  var client: ICefClient; var settings: TCefBrowserSettings;
+  var extra_info: ICefDictionaryValue; var use_default_window: boolean);
+begin
+
+end;
+
 procedure TFormChzzkWeb.Chromium1BeforePopup(Sender: TObject;
   const browser: ICefBrowser; const frame: ICefFrame; const targetUrl,
   targetFrameName: ustring; targetDisposition: TCefWindowOpenDisposition;
@@ -631,7 +298,14 @@ procedure TFormChzzkWeb.Chromium1BeforePopup(Sender: TObject;
   var settings: TCefBrowserSettings; var extra_info: ICefDictionaryValue;
   var noJavascriptAccess: Boolean; var Result: Boolean);
 begin
-  Result:=True;
+  Result := (targetDisposition in [CEF_WOD_NEW_FOREGROUND_TAB, CEF_WOD_NEW_BACKGROUND_TAB, CEF_WOD_NEW_POPUP, CEF_WOD_NEW_WINDOW]);
+end;
+
+procedure TFormChzzkWeb.Chromium1ChromeCommand(Sender: TObject;
+  const browser: ICefBrowser; command_id: integer;
+  disposition: TCefWindowOpenDisposition; var aResult: boolean);
+begin
+    aResult:=True;
 end;
 
 procedure TFormChzzkWeb.Chromium1Close(Sender: TObject; const browser: ICefBrowser;
@@ -644,21 +318,12 @@ end;
 procedure TFormChzzkWeb.Chromium1LoadingProgressChange(Sender: TObject;
   const browser: ICefBrowser; const progress: double);
 begin
-  // wait browser loading
-  if progress<1.0 then
-    iCountVisit:=0
-    else
-      iCountVisit:=1;
 end;
 
 procedure TFormChzzkWeb.Chromium1LoadingStateChange(Sender: TObject;
   const browser: ICefBrowser; isLoading, canGoBack, canGoForward: Boolean);
 begin
-  // wait browser loading
-  if isLoading then
-    iCountVisit:=0
-    else
-      iCountVisit:=1;
+
 end;
 
 function InsertTime(var s:ustring):Boolean;
@@ -679,31 +344,36 @@ procedure TFormChzzkWeb.Chromium1ProcessMessageReceived(Sender: TObject;
   sourceProcess: TCefProcessId; const message: ICefProcessMessage; out
   Result: Boolean);
 var
-  s: ustring;
+  buf: ustring;
 begin
   // browser message
   Result := False;
   if message=nil then
     exit;
-
-  if message.Name=SLOGCHAT then
+  if message.Name='postMessage' then
     begin
-      s:=message.ArgumentList.GetString(0);
-      if IncludeChatTime then
-        InsertTime(s);
-      SockServerChat.BroadcastMsg(UTF8Encode(s));
-      Result:=True;
-    end else
-    if message.Name=SLOGSYS then
+      buf:=message.ArgumentList.GetString(0);
+      if buf='!Observer Start!' then begin
+        observer_started:=True;
+      end else
       begin
-        s:=message.ArgumentList.GetString(0);
-        if IncludeChatTime then
-          InsertTime(s);
-        SockServerSys.BroadcastMsg(UTF8Encode(s));
-        if WSPortUnique then
-          SockServerChat.BroadcastMsg(UTF8Encode(s));
+        if (Pos(UTF8Decode(syschat_str),buf)>0) and
+           (Pos(UTF8Decode(syschat_guide),buf)=0) then
+         begin
+           SockServerSys.BroadcastMsg(UTF8Encode(buf));
+           if WSPortUnique then
+             SockServerChat.BroadcastMsg(UTF8Encode(buf));
+         end
+         else
+           SockServerChat.BroadcastMsg(UTF8Encode(buf));
+
+        FTemp:=buf;
+        PostMessage(Handle,LM_Return_Value,0,0);
+        //if IncludeChatTime then
+        //  InsertTime(s);
         Result:=True;
       end;
+    end;
 end;
 
 procedure TFormChzzkWeb.EditurlKeyPress(Sender: TObject; var Key: char);
@@ -718,7 +388,7 @@ end;
 procedure TFormChzzkWeb.FormClose(Sender: TObject; var CloseAction: TCloseAction
   );
 begin
-  stripusertooltip.Free;
+
 end;
 
 procedure TFormChzzkWeb.FormDestroy(Sender: TObject);
@@ -734,8 +404,6 @@ end;
 
 procedure TFormChzzkWeb.FormShow(Sender: TObject);
 begin
-  stripusertooltip:=TRegExpr.Create('\<span\sclass\="badge_tooltip.+\/span\>');
-  MakeCheck(strhidden,CheckHidden);
 
   if FileExists('config.xml') then
     XMLConfig1.LoadFromFile('config.xml');
@@ -743,18 +411,17 @@ begin
   IncludeChatTime:=XMLConfig1.GetValue('IncludeTime',False);
   WSPortChat:=XMLConfig1.GetValue('WS/PORT','65002');
   WSPortSys:=XMLConfig1.GetValue('WS/PORTSYS','65003');
-  WSPortUnique:=XMLConfig1.GetValue('WS/UNIQUE',False);
+  WSPortUnique:=XMLConfig1.GetValue('WS/UNIQUE',WSPortUnique);
   ActionChatTime.Checked:=IncludeChatTime;
   ActionWSockUnique.Checked:=WSPortUnique;
 
   chatlog_full:=UTF8Encode(XMLConfig1.GetValue('CHAT/FULL',UTF8Decode(chatlog_full)));
+  chatlog_full_unique:=UTF8Encode(XMLConfig1.GetValue('CHAT/FULLUNIQUE',UTF8Decode(chatlog_full_unique)));
   chatlog_chatonly:=UTF8Encode(XMLConfig1.GetValue('CHAT/CHAT',UTF8Decode(chatlog_chatonly)));
   chatlog_donation:=UTF8Encode(XMLConfig1.GetValue('CHAT/DONATION',UTF8Decode(chatlog_donation)));
+  chatlog_userid:=UTF8Encode(XMLConfig1.GetValue('CHAT/USERID',UTF8Decode(chatlog_userid)));
 
-  // start websocket server
-  SockServerChat:=TSimpleWebsocketServer.Create(WSPortChat);
-  SockServerSys:=TSimpleWebsocketServer.Create(WSPortSys);
-
+  SetUpWebSocketPort;
   SetFormCaption;
 
   if not(Chromium1.CreateBrowser(CEFWindowParent1, '')) then Timer1.Enabled := True;
@@ -779,18 +446,23 @@ end;
 
 procedure TFormChzzkWeb.Timer2Timer(Sender: TObject);
 begin
-  PostMessage(Handle, MSGVISITDOM, 0, 0);
+  PostMessage(Handle, LM_Execute_script, 0, 0);
 end;
 
-procedure TFormChzzkWeb.VISITDOM(var Msg: TLMessage);
+procedure TFormChzzkWeb.ExecuteScript(var Msg: TLMessage);
 var
   TempMsg : ICefProcessMessage;
 begin
-  // Send Message to Renderer for parsing
-  if iCountVisit=0 then
+  if observer_started then
     exit;
-  TempMsg := TCefProcessMessageRef.New(SVISITDOM);
-  Chromium1.SendProcessMessage(PID_RENDERER, TempMsg);
+  // Send Message to Renderer for parsing
+  if 0<Pos('chzzk.naver.com/live/',Chromium1.DocumentURL) then
+    Chromium1.ExecuteJavaScript(cqueryjs,'');
+end;
+
+procedure TFormChzzkWeb.ReceiveResult(var Msg: TLMessage);
+begin
+  //
 end;
 
 procedure TFormChzzkWeb.CEFCreated(var Msg: TLMessage);
@@ -815,18 +487,122 @@ begin
   Caption:='ChzzkWeb '+RxVersionInfo1.FileVersion+' '+IntToHex(cefVer,8)+' @'+WSPortChat;
 end;
 
+procedure TFormChzzkWeb.SetUpWebSocketPort;
+var
+  i, j: Integer;
+begin
+  // start websocket server
+  if Assigned(SockServerChat) then
+    SockServerChat.Free;
+  if Assigned(SockServerSys) then
+    SockServerSys.Free;
+  j:=0;
+  if not TryStrToInt(WSPortChat,i) then
+  begin
+    WSPortChat:='65002';
+    i:=65002;
+  end;
+  while j<8 do begin
+    try
+      SockServerChat:=TSimpleWebsocketServer.Create(WSPortChat);
+      try
+        WSPortSys:=IntToStr(i+1);
+        SockServerSys:=TSimpleWebsocketServer.Create(WSPortSys);
+        break;
+      except
+        SockServerChat.Free;
+        raise;
+      end;
+    except
+      Inc(j,2);
+      Inc(i,j);
+      WSPortChat:=IntToStr(i);
+    end;
+  end;
+end;
+
+procedure TFormChzzkWeb.ReplaceWSPortHTML(const fname, port1, port2: string);
+const
+  rport = '(?-s)(WebSocket\(\"ws\:.+)(\:\d+)(\",\"chat\"\);)';
+var
+  fs: TStringStream;
+  regport: TRegExpr;
+  res: string;
+  i, j: Integer;
+begin
+  res:='';
+  i:=1;
+  fs := TStringStream.Create('');
+  try
+    fs.LoadFromFile(fname);
+    regport:=TRegExpr.Create(rport);
+    try
+      // first item
+      if (port1<>'') and regport.Exec(fs.DataString) then
+      begin
+        j:=regport.MatchPos[2];
+        res:=res+Copy(fs.DataString,i,j-i+1)+port1;
+        i:=regport.MatchPos[3];
+      end;
+      // second item
+      if (port2<>'') and regport.ExecNext then
+      begin
+        j:=regport.MatchPos[2];
+        res:=res+Copy(fs.DataString,i,j-i+1)+port2;
+        i:=regport.MatchPos[3];
+      end;
+      res:=res+Copy(fs.DataString,i);
+      // save to file
+      fs.Clear;
+      fs.WriteString(res);
+      fs.SaveToFile(fname);
+    finally
+      regport.Free;
+    end;
+  finally
+    fs.Free;
+  end;
+end;
+
+procedure GlobalCEFApp_OnWebKitInitialized;
+var
+  TempExtensionCode : string;
+  TempHandler       : ICefv8Handler;
+begin
+
+  TempExtensionCode := 'var browserExt;' +
+                       'if (!browserExt)' +
+                       '  browserExt = {};' +
+                       '(function() {' +
+                       '  browserExt.postMessage = function(b) {' +
+                       '    native function postMessage();' +
+                       '    postMessage(b);' +
+                       '  };' +
+                       '})();';
+
+  try
+    TempHandler := TWebExtensionHandler.Create;
+
+    if CefRegisterExtension('browserExt', TempExtensionCode, TempHandler) then
+      {CEFDebugLog('JavaScript extension registered successfully!')}
+     else
+      {CefDebugLog('There was an error registering the JavaScript extension!')};
+  finally
+    TempHandler := nil;
+  end;
+end;
 
 // initialize CEF
 
 procedure CreateGlobalCEFApp;
 begin
   GlobalCEFApp                     := TCefApplication.Create;
-  GlobalCEFApp.OnProcessMessageReceived := @GlobalCEFApp_OnProcessMessageReceived;
+  GlobalCEFApp.OnWebKitInitialized := @GlobalCEFApp_OnWebKitInitialized;
   GlobalCEFApp.cache               := 'cache';
   GlobalCEFApp.LogFile             := 'debug.log';
   GlobalCEFApp.LogSeverity         := LOGSEVERITY_ERROR;
   GlobalCEFApp.EnablePrintPreview  := False;
-  GlobalCEFApp.EnableGPU           := True;
+  //GlobalCEFApp.EnableGPU           := True;
   GlobalCEFApp.SetCurrentDir       := True;
   GlobalCEFApp.CheckCEFFiles       := False;
   //GlobalCEFApp.SingleProcess       := True;
