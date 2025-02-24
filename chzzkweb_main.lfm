@@ -10,6 +10,8 @@ object FormChzzkWeb: TFormChzzkWeb
   SessionProperties = 'Editurl.Text;Width;Height;WindowState;Top;Left'
   LCLVersion = '4.99.0.0'
   OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
   object CEFWindowParent1: TCEFWindowParent

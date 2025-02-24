@@ -96,6 +96,8 @@ type
     procedure EditurlKeyPress(Sender: TObject; var Key: char);
 
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure JvXPButton1Click(Sender: TObject);
@@ -107,6 +109,9 @@ type
     // CEF
     procedure CEFCreated(var Msg:TLMessage); message CEF_AFTERCREATED;
     procedure CEFDestroy(var Msg:TLMessage); message CEF_DESTROY;
+  protected
+    FClosing: Boolean;
+    FCanClose: Boolean;
   public
     procedure SetFormCaption;
 
@@ -284,6 +289,7 @@ end;
 procedure TFormChzzkWeb.Chromium1BeforeClose(Sender: TObject;
   const browser: ICefBrowser);
 begin
+  FCanClose := True;
   PostMessage(Handle, WM_CLOSE, 0,0);
 end;
 
@@ -392,6 +398,25 @@ procedure TFormChzzkWeb.FormClose(Sender: TObject; var CloseAction: TCloseAction
   );
 begin
 
+end;
+
+procedure TFormChzzkWeb.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose := FCanClose;
+
+  if not(FClosing) then
+    begin
+      FClosing := True;
+      Visible  := False;
+      Chromium1.CloseBrowser(True);
+      CEFWindowParent1.Free;
+    end;
+end;
+
+procedure TFormChzzkWeb.FormCreate(Sender: TObject);
+begin
+  FClosing:=False;
+  FCanClose:=False;
 end;
 
 procedure TFormChzzkWeb.FormDestroy(Sender: TObject);
