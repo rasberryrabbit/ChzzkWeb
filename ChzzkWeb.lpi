@@ -15,8 +15,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="1"/>
-      <RevisionNr Value="14"/>
-      <BuildNr Value="2"/>
+      <RevisionNr Value="15"/>
+      <BuildNr Value="1"/>
     </VersionInfo>
     <BuildModes>
       <Item Name="Default" Default="True"/>
@@ -86,6 +86,11 @@
         <Filename Value="uchecksumlist.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uChecksumList"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uwebexthandler.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uWebExtHandler"/>
       </Unit>
     </Units>
   </ProjectOptions>

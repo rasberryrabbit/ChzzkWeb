@@ -12,12 +12,12 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, Windows,
   uCEFApplication,
-  ChzzkWeb_Main, uChecksumList, uniqueinstance_package, rxnew
+  ChzzkWeb_Main, uChecksumList, uniqueinstance_package
   { you can add units after this };
 
 {$R *.res}
 
-{$SetPEFlags IMAGE_FILE_LARGE_ADDRESS_AWARE}
+//{$SetPEFlags IMAGE_FILE_LARGE_ADDRESS_AWARE}
 
 begin
   CreateGlobalCEFApp;
