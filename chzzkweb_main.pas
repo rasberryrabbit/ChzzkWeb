@@ -8,13 +8,12 @@ uses
   Classes, SysUtils, XMLConf, Forms, Controls, Graphics, Dialogs, StdCtrls,
   uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants,
   uCEFInterfaces, uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages,
-  ExtCtrls, ActnList, Menus, uCEFWinControl, UniqueInstance, JvXPButtons,
-  RxVersInfo, uWebExtHandler;
+  ExtCtrls, ActnList, Menus, XMLPropStorage, uCEFWinControl, UniqueInstance,
+  JvXPButtons, RxVersInfo, uWebExtHandler;
 
 
 const
   LM_Execute_script = LM_USER+$102;
-  LM_Return_Value = LM_USER+$103;
 
 type
 
@@ -52,6 +51,7 @@ type
     Timer2: TTimer;
     UniqueInstance1: TUniqueInstance;
     XMLConfig1: TXMLConfig;
+    XMLPropStorage1: TXMLPropStorage;
     procedure ActionChatTimeExecute(Sender: TObject);
     procedure ActionChatuserExecute(Sender: TObject);
     procedure ActionDebugLogExecute(Sender: TObject);
@@ -103,7 +103,6 @@ type
     procedure Timer2Timer(Sender: TObject);
   private
     procedure ExecuteScript(var Msg:TLMessage); message LM_Execute_script;
-    procedure ReceiveResult(var Msg:TLMessage); message LM_Return_Value;
 
     // CEF
     procedure CEFCreated(var Msg:TLMessage); message CEF_AFTERCREATED;
@@ -373,8 +372,6 @@ begin
          else
            SockServerChat.BroadcastMsg(UTF8Encode(buf));
 
-        FTemp:=buf;
-        PostMessage(Handle,LM_Return_Value,0,0);
         //if IncludeChatTime then
         //  InsertTime(s);
         Result:=True;
@@ -466,16 +463,11 @@ begin
     Chromium1.ExecuteJavaScript(cqueryjs,'');
 end;
 
-procedure TFormChzzkWeb.ReceiveResult(var Msg: TLMessage);
-begin
-  //
-end;
-
 procedure TFormChzzkWeb.CEFCreated(var Msg: TLMessage);
 begin
   CEFWindowParent1.UpdateSize;
   // loading chzzk live
-  ButtonHome.Click;
+  ButtonGo.Click;
 end;
 
 procedure TFormChzzkWeb.CEFDestroy(var Msg: TLMessage);
