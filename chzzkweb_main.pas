@@ -605,20 +605,20 @@ var
   TempHandler       : ICefv8Handler;
 begin
 
-  TempExtensionCode := 'var browserExt;' +
-                       'if (!browserExt)' +
-                       '  browserExt = {};' +
+  TempExtensionCode := 'var '+ExtensionName+';' +
+                       'if (!'+ExtensionName+')' +
+                       '  '+ExtensionName+' = {};' +
                        '(function() {' +
-                       '  browserExt.postMessage = function(b) {' +
-                       '    native function postMessage();' +
-                       '    postMessage(b);' +
+                       '  '+ExtensionName+'.'+MessagePostName+' = function(b) {' +
+                       '    native function '+MessagePostName+'();' +
+                       '    '+MessagePostName+'(b);' +
                        '  };' +
                        '})();';
 
   try
     TempHandler := TWebExtensionHandler.Create;
 
-    if CefRegisterExtension('browserExt', TempExtensionCode, TempHandler) then
+    if CefRegisterExtension(ExtensionName, TempExtensionCode, TempHandler) then
       {CEFDebugLog('JavaScript extension registered successfully!')}
      else
       {CefDebugLog('There was an error registering the JavaScript extension!')};

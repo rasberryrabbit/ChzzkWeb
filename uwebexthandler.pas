@@ -9,6 +9,10 @@ uses
   uCEFRenderProcessHandler, uCEFBrowserProcessHandler, uCEFInterfaces, uCEFProcessMessage,
   uCEFv8Context, uCEFTypes, uCEFv8Handler;
 
+const
+  MessagePostName = 'postMessage';
+  ExtensionName = 'browserExt';
+
 type
   TWebExtensionHandler = class(TCefv8HandlerOwn)
     protected
@@ -32,7 +36,7 @@ begin
   Result := False;
 
   try
-    if (name = 'postMessage') then
+    if (name = MessagePostName) then
       begin
         if (length(arguments) > 0) and arguments[0].IsString then
           begin
