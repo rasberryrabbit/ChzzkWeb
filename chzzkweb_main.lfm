@@ -106,10 +106,6 @@ object FormChzzkWeb: TFormChzzkWeb
       Caption = '구독/도네이션 파일 열기'
       OnExecute = ActionOpenNotifyExecute
     end
-    object ActionDebugLog: TAction
-      Caption = '디버그 로그 활성화'
-      OnExecute = ActionDebugLogExecute
-    end
     object ActionChatTime: TAction
       Caption = '시간 태크 추가'
       OnExecute = ActionChatTimeExecute

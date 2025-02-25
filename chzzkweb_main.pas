@@ -9,7 +9,7 @@ uses
   uCEFWindowParent, uCEFChromium, uCEFApplication, uCEFConstants,
   uCEFInterfaces, uCEFChromiumEvents, uCEFTypes, uCEFChromiumCore, LMessages,
   ExtCtrls, ActnList, Menus, XMLPropStorage, uCEFWinControl, UniqueInstance,
-  JvXPButtons, RxVersInfo, uWebExtHandler;
+  RxVersInfo, uWebExtHandler;
 
 
 const
@@ -25,7 +25,6 @@ type
     ActionWSockUnique: TAction;
     ActionOpenChatFull: TAction;
     ActionChatTime: TAction;
-    ActionDebugLog: TAction;
     ActionOpenNotify: TAction;
     ActionOpenChat: TAction;
     ActionWSPort: TAction;
@@ -55,7 +54,6 @@ type
     XMLPropStorage1: TXMLPropStorage;
     procedure ActionChatTimeExecute(Sender: TObject);
     procedure ActionChatuserExecute(Sender: TObject);
-    procedure ActionDebugLogExecute(Sender: TObject);
     procedure ActionOpenChatExecute(Sender: TObject);
     procedure ActionOpenChatFullExecute(Sender: TObject);
     procedure ActionOpenNotifyExecute(Sender: TObject);
@@ -172,17 +170,13 @@ var
   WSPortUnique: Boolean = False;
   SockServerChat: TSimpleWebsocketServer;
   SockServerSys: TSimpleWebsocketServer;
-  ProcessSysChat: Boolean = False;
   IncludeChatTime: Boolean = False;
   chatlog_full: string = 'doc\webchatlog_list.html';
   chatlog_full_unique: string = 'doc\webchatlog_list_unique.html';
   chatlog_donation: string = 'doc\webchatlog_donation_sub.html';
   chatlog_chatonly: string = 'doc\webchatlog_chatbox.html';
   chatlog_userid: string = 'doc\webchatlog_user_unique.html';
-  stripusertooltip: TRegExpr;
-  PageLoaded: Boolean = False;
   observer_started: Boolean = False;
-  FTemp: ustring;
 
 
 { TFormChzzkWeb }
@@ -194,8 +188,7 @@ end;
 
 procedure TFormChzzkWeb.ActionWSPortExecute(Sender: TObject);
 var
-  ir, i: Integer;
-  port: string;
+  ir: Integer;
 begin
   ir:=InputCombo('웹소켓 포트','웹소켓 포트를 지정',['63002','63010','63020','63030','63040']);
   case ir of
@@ -235,12 +228,6 @@ begin
    ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_full)),nil,nil,SW_SHOWNORMAL)
    else
     ShellExecuteW(0,'open',pwidechar(ExtractFilePath(Application.ExeName)+UTF8Decode(chatlog_full_unique)),nil,nil,SW_SHOWNORMAL)
-end;
-
-procedure TFormChzzkWeb.ActionDebugLogExecute(Sender: TObject);
-begin
-  ActionDebugLog.Checked:=not ActionDebugLog.Checked;
-  //CEFDebugLog:=ActionDebugLog.Checked;
 end;
 
 procedure TFormChzzkWeb.ActionChatTimeExecute(Sender: TObject);
