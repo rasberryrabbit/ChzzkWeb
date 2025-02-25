@@ -21,8 +21,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ChzzkWeb_Main"/>
-        <TopLine Value="601"/>
-        <CursorPos X="25" Y="145"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="45"/>
+        <CursorPos Y="57"/>
         <UsageCount Value="131"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -40,7 +41,6 @@
         <Filename Value="uwebexthandler.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uWebExtHandler"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <CursorPos X="31" Y="14"/>
         <UsageCount Value="31"/>
@@ -341,19 +341,7 @@
         <UsageCount Value="10"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="28">
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="234" Column="31" TopLine="209"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="246" Column="3" TopLine="238"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="17" TopLine="4"/>
-      </Position>
+    <JumpHistory HistoryIndex="29">
       <Position>
         <Filename Value="chzzkweb_main.pas"/>
         <Caret Line="106" TopLine="93"/>
@@ -456,6 +444,22 @@
       <Position>
         <Filename Value="chzzkweb_main.pas"/>
         <Caret Line="266" Column="39" TopLine="255"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="71" Column="27" TopLine="61"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="175" Column="5" TopLine="229"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="174" Column="5" TopLine="174"/>
+      </Position>
+      <Position>
+        <Filename Value="chzzkweb_main.pas"/>
+        <Caret Line="234" TopLine="225"/>
       </Position>
     </JumpHistory>
     <RunParams>
