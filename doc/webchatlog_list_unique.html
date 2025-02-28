@@ -24,14 +24,14 @@ $(document).ready(function(){
   // make resizable
   //$("#wrapper").resizable({autoHide: true, stop: function (event, ui) {
   //          chatsize[windowname] = ui.size;
-  //          localStorage.chatsize = JSON.stringify(chatsize);
+  //         localStorage.chatsize = JSON.stringify(chatsize);
   //      }}); 
 });
 </script>
 </head> 
 <body>
-<div id="wrapper" >   
-    <div id="chatbox"></div>
+<div id="wrapper" >
+    <div id="chatbox" style="overflow: auto; max-height:96vh"></div>
 </div>
 <script type="text/javascript" src="reconnecting-websocket.min.js"></script>
 <script type="text/javascript">
@@ -39,13 +39,14 @@ var itemmax=200;
 var itemlimit=700;
 var doscroll=1;
 //
-$(window).on('scroll', function(){
-  var curpos=$(window).scrollTop();
-  var height = $("#chatbox").height();
-  var pageHeight = $(window).height();
+$("#chatbox").on('scroll', function(){
+  var curpos=$("#chatbox").scrollTop();
+  var height = $("#chatbox").prop('scrollHeight');
+  var pageHeight = $("#wrapper").height();
+  var itemHeight = $('#chatbox').children().last().height() * 3;
   doscroll=1;
   if (height > pageHeight) {
-      if (curpos + pageHeight + 30 >= height) {
+      if (itemHeight<=0 || height-curpos-pageHeight < itemHeight) {
         doscroll=1;
       } else {
         doscroll=0;
@@ -54,7 +55,7 @@ $(window).on('scroll', function(){
 })
 
 //
-var chatsock1 = new ReconnectingWebSocket("ws://localhost:63002","chat");
+var chatsock1 = new ReconnectingWebSocket("ws://localhost:65002","chat");
 chatsock1.reconnectInterval=1000;
 chatsock1.onmessage = function (event) {
     var div = $("#chatbox");
@@ -65,11 +66,8 @@ chatsock1.onmessage = function (event) {
           div.children('div')[0].remove();
         }      
         // scroll
-        var height = div.height();
-        var pageHeight = $(window).height();
-        if (height > pageHeight) {
-          window.scrollTo(0, height - pageHeight);
-        }
+        var le=document.querySelector('#chatbox').lastChild;
+        le.scrollIntoView({behavior: "smooth", block: "end"});
     } else {
         if (div.children('div').length>itemlimit) {
           div.children('div')[0].remove();
