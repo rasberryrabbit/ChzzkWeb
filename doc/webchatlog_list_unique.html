@@ -46,7 +46,7 @@ $("#chatbox").on('scroll', function(){
   var scrollHeight = pageHeight * 0.2;
   doscroll=1;
   if (height > pageHeight) {
-      if (itemHeight<=0 || height-curpos-pageHeight < scrollHeight) {
+      if (height-curpos-pageHeight < scrollHeight) {
         doscroll=1;
       } else {
         doscroll=0;
@@ -55,7 +55,7 @@ $("#chatbox").on('scroll', function(){
 })
 
 //
-var chatsock1 = new ReconnectingWebSocket("ws://localhost:65002","chat");
+var chatsock1 = new ReconnectingWebSocket("ws://localhost:63002","chat");
 chatsock1.reconnectInterval=1000;
 chatsock1.onmessage = function (event) {
     var div = $("#chatbox");
