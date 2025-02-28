@@ -42,11 +42,11 @@ var doscroll=1;
 $("#chatbox").on('scroll', function(){
   var curpos=$("#chatbox").scrollTop();
   var height = $("#chatbox").prop('scrollHeight');
-  var pageHeight = $("#wrapper").height();
-  var itemHeight = $('#chatbox').children().last().height() * 3;
+  var pageHeight = $("#chatbox").height();
+  var scrollHeight = pageHeight * 0.2;
   doscroll=1;
   if (height > pageHeight) {
-      if (itemHeight<=0 || height-curpos-pageHeight < itemHeight) {
+      if (itemHeight<=0 || height-curpos-pageHeight < scrollHeight) {
         doscroll=1;
       } else {
         doscroll=0;
