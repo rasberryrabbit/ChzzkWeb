@@ -177,6 +177,7 @@ var
   chatlog_chatonly: string = 'doc\webchatlog_chatbox.html';
   chatlog_userid: string = 'doc\webchatlog_user_unique.html';
   observer_started: Boolean = False;
+  page_avail: Boolean = False;
 
 
 { TFormChzzkWeb }
@@ -275,7 +276,7 @@ procedure TFormChzzkWeb.Chromium1AddressChange(Sender: TObject;
 begin
   Editurl.Text:=url;
   observer_started:=False;
-  Timer2.Enabled:=True;
+  page_avail:=False;
 end;
 
 procedure TFormChzzkWeb.Chromium1AfterCreated(Sender: TObject;
@@ -333,7 +334,7 @@ end;
 procedure TFormChzzkWeb.Chromium1LoadingStateChange(Sender: TObject;
   const browser: ICefBrowser; isLoading, canGoBack, canGoForward: Boolean);
 begin
-
+  page_avail:=not isLoading;
 end;
 
 function InsertTime(var s:ustring):Boolean;
@@ -477,7 +478,7 @@ procedure TFormChzzkWeb.ExecuteScript(var Msg: TLMessage);
 var
   TempMsg : ICefProcessMessage;
 begin
-  if observer_started then
+  if observer_started or (not page_avail) then
     exit;
   // Send Message to Renderer for parsing
   if 0<Pos('chzzk.naver.com/live/',Chromium1.DocumentURL) then
