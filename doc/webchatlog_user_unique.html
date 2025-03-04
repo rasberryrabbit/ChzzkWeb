@@ -151,6 +151,17 @@ chatsock1.onmessage = function (event) {
         // add chat message on user selection window
         var userchat=$(event.data).clone();
         $("#seluserchat").append(userchat[0]);
+        // tts
+        var temp=userchat.find('span.live_chatting_message_text__DyleH');
+        if(temp) {
+            var text=temp.text();
+            const speech = new SpeechSynthesisUtterance(text);
+            speech.lang = 'ko-KR';
+            speech.pitch = 2;
+            speech.rate = 2;
+            window.speechSynthesis.speak(speech);
+            temp=null;
+        }
     }
 }
 
@@ -262,6 +273,7 @@ document.getElementById('selectNumberBtn').addEventListener('click', function() 
         popup.style.display = 'none';
         overlay.style.display = 'none';
         $('.pyro').css('display','none');
+        reviewuser='';
     });
 });
 </script>
