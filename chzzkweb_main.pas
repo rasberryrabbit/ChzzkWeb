@@ -366,7 +366,7 @@ begin
   if message.Name='postMessage' then
     begin
       buf:=message.ArgumentList.GetString(0);
-      if (not observer_started) and (buf='!Observer Start!') then begin
+      if (not observer_started) {and (buf='!Observer Start!')} then begin
         observer_started:=True;
       end else
       begin
