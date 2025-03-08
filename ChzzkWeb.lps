@@ -21,8 +21,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ChzzkWeb_Main"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="363"/>
+        <TopLine Value="364"/>
         <CursorPos X="63" Y="369"/>
         <UsageCount Value="131"/>
         <Loaded Value="True"/>
@@ -107,9 +106,10 @@
       <Unit>
         <Filename Value="uwebsocksimple.pas"/>
         <UnitName Value="uWebsockSimple"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="65"/>
-        <CursorPos X="6" Y="77"/>
+        <TopLine Value="39"/>
+        <CursorPos Y="52"/>
         <UsageCount Value="53"/>
         <Loaded Value="True"/>
       </Unit>
@@ -344,21 +344,6 @@
     <JumpHistory HistoryIndex="29">
       <Position>
         <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="112" Column="20" TopLine="98"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="113" Column="20" TopLine="89"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
-        <Caret Line="168" Column="26" TopLine="146"/>
-      </Position>
-      <Position>
-        <Filename Value="chzzkweb_main.pas"/>
         <Caret Line="648" Column="5" TopLine="623"/>
       </Position>
       <Position>
@@ -460,6 +445,22 @@
       <Position>
         <Filename Value="chzzkweb_main.pas"/>
         <Caret Line="481" Column="22" TopLine="460"/>
+      </Position>
+      <Position>
+        <Filename Value="uwebsocksimple.pas"/>
+        <Caret Line="22" Column="24" TopLine="5"/>
+      </Position>
+      <Position>
+        <Filename Value="uwebsocksimple.pas"/>
+        <Caret Line="64" Column="3" TopLine="60"/>
+      </Position>
+      <Position>
+        <Filename Value="uwebsocksimple.pas"/>
+        <Caret Line="22" Column="22" TopLine="9"/>
+      </Position>
+      <Position>
+        <Filename Value="uwebsocksimple.pas"/>
+        <Caret Line="85" TopLine="62"/>
       </Position>
     </JumpHistory>
     <RunParams>
