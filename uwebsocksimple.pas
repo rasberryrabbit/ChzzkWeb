@@ -8,8 +8,7 @@ interface
 uses
   Classes, SysUtils,
   { mormot2 }
-  mormot.net.ws.core, mormot.net.ws.server, mormot.net.server,
-  uChatBuffer;
+  mormot.net.ws.core, mormot.net.ws.server, mormot.net.server;
 
 type
 
@@ -20,13 +19,10 @@ type
       fServer:TWebSocketServer;
     protected
     public
-      ChatBuffer: TCefChatBuffer;
-
-      constructor Create(const Port:string; ChatBuf:TCefChatBuffer=nil);
+      constructor Create(const Port:string);
       destructor Destroy; override;
 
       procedure BroadcastMsg(const msg: RawByteString);
-      procedure AddChatbuf(const msg: RawByteString);
   end;
 
   { TWebSocketProtocolEcho }
@@ -53,20 +49,17 @@ begin
   focBinary, focText :
       if Assigned(Server) then begin
         Server.BroadcastMsg(Frame.payload);
-        Server.AddChatbuf(Frame.payload);
       end;
   end;
 end;
 
 { TSimpleWebsocketServer }
 
-constructor TSimpleWebsocketServer.Create(const Port: string;
-  ChatBuf: TCefChatBuffer);
+constructor TSimpleWebsocketServer.Create(const Port: string);
 var
   protocol:TWebSocketProtocolEcho;
 begin
   fServer:=TWebSocketServer.Create(Port,nil,nil,'Chzzkchat');
-  ChatBuffer:=ChatBuf;
   protocol:=TWebSocketProtocolEcho.Create('chat','');
   protocol.Server:=Self;
   protocol.OnIncomingFrame:=@protocol.onExIncomeFrame;
@@ -87,12 +80,6 @@ begin
   outmsg.opcode:=focText;
   outmsg.payload:=msg;
   fServer.WebSocketBroadcast(outmsg);
-end;
-
-procedure TSimpleWebsocketServer.AddChatbuf(const msg: RawByteString);
-begin
-  if Assigned(ChatBuffer) then
-    ChatBuffer.Add(msg);
 end;
 
 
